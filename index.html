@@ -89,6 +89,7 @@
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
         .title { font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8; }
         
+        /* Toast Notification */
         #toast {
             visibility: hidden; min-width: 150px; background-color: var(--accent); color: #0f172a;
             text-align: center; border-radius: 10px; padding: 10px; position: fixed;
@@ -104,11 +105,12 @@
 <div id="toast">Copied!</div>
 
 <div class="container">
-    <div id="page-kurs" class="page">
+    <div id="page-kurs" class="page active">
         <div class="header">
             <h2>💱 Calc Kurs Fast</h2>
             <button class="refresh-btn" onclick="fetchAllPrices()">🔄 Update</button>
         </div>
+
         <div id="fixed-list">
             <div class="coin-card" style="border-left: 5px solid #ef4444;">
                 <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
@@ -165,11 +167,181 @@
         <div class="header">
             <h2>💰 Calc APR</h2>
         </div>
+        
         <label class="apr-label">MATA UANG</label>
         <div class="currency-switch">
             <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
             <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
+        
         <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO (Rp)</label>
         <div class="apr-input-box">
-            <input type="text" id="saldo-apr" inputmode
+            <input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
+        </div>
+        <div id="cek-saldo-apr" class="terbilang"></div>
+        
+        <label class="apr-label">BUNGA PER TAHUN (%)</label>
+        <div class="apr-input-box">
+            <input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
+        </div>
+
+        <div style="margin-top: 25px;">
+            <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
+            <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
+            <div class="apr-card bulan"><span class="title">Estimasi Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
+            <div class="apr-card tahun"><span class="title">Estimasi Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('kurs', this)"><span>💱</span><span>Kurs</span></button>
+    <button class="tab-btn" onclick="switchTab('apr', this)"><span>💰</span><span>APR</span></button>
+</div>
+
+<script>
+    function switchTab(target, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('page-' + target).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    let usdToIdr = 16250; 
+    let prices = { btc: 0, eth: 0 };
+    let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
+
+    function formatOutput(num, dec) {
+        if (num === 0) return "";
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
+    }
+
+    // Fungsi Copy Kurs
+    function copyValKurs(id) {
+        let val = document.getElementById(id).value.replace(/,/g, '');
+        if (!val || val == "0") return;
+        navigator.clipboard.writeText(val).then(() => {
+            let toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+        });
+    }
+
+    // --- LOGIKA KURS ---
+    function calculateKurs(source) {
+        let el = document.getElementById(source);
+        let rawValue = el.value.replace(/,/g, '');
+        if (rawValue === "" || rawValue === "." || rawValue === "0" || rawValue === "0.") {
+            const allInputs = document.querySelectorAll('#page-kurs input[inputmode="decimal"]');
+            allInputs.forEach(input => { if(input.id !== source) input.value = ""; });
+            return;
+        }
+        let val = parseFloat(rawValue) || 0;
+        let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
+
+        if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
+        if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
+        if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
+        if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
+        watchlist.forEach(s => {
+            if (s !== source) {
+                let target = document.getElementById(s);
+                if (target) target.value = formatOutput(baseUsd / (prices[s] || 1), 6);
+            }
+        });
+        if (!el.value.includes('.')) {
+            let d = (source === 'idr') ? 0 : (source === 'usd' ? 4 : 8);
+            el.value = formatOutput(val, d);
+        }
+    }
+
+    // --- LOGIKA APR ---
+    let currentCurrencyAPR = 'IDR';
+    function setCurrencyAPR(type) {
+        currentCurrencyAPR = type;
+        document.getElementById('btn-idr-apr').classList.toggle('active', type === 'IDR');
+        document.getElementById('btn-usd-apr').classList.toggle('active', type === 'USD');
+        document.getElementById('label-saldo-apr').innerText = `JUMLAH SALDO (${type === 'IDR' ? 'Rp' : '$'})`;
+        hitungAPR();
+    }
+
+    function hitungAPR() {
+        let elSaldo = document.getElementById('saldo-apr');
+        let elBunga = document.getElementById('bunga-apr');
+        let rawSaldo = elSaldo.value.replace(/,/g, '');
+        let rawBunga = elBunga.value.replace(/,/g, '');
+        let saldo = parseFloat(rawSaldo) || 0;
+        let bunga = parseFloat(rawBunga) || 0;
+
+        if (!elSaldo.value.includes('.')) elSaldo.value = formatOutput(saldo, 4);
+        if (!elBunga.value.includes('.')) elBunga.value = formatOutput(bunga, 2);
+
+        const hasilTahun = saldo * (bunga / 100);
+        const periods = {'tahunan': hasilTahun, 'bulanan': hasilTahun / 12, 'mingguan': hasilTahun / 52, 'harian': hasilTahun / 365};
+        
+        document.getElementById('cek-saldo-apr').innerText = (currentCurrencyAPR === 'USD') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo * usdToIdr)) : "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo));
+
+        for (let key in periods) {
+            let val = periods[key];
+            document.getElementById(`${key}-apr`).innerText = (currentCurrencyAPR === 'IDR') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val)) : "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+            let subEl = document.getElementById(`${key}-idr`);
+            subEl.innerText = (currentCurrencyAPR === 'USD' && val > 0) ? "≈ Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val * usdToIdr)) : "";
+        }
+    }
+
+    // --- FETCH & RENDER ---
+    function getLogo(sym) {
+        const s = sym.toLowerCase();
+        if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
+        if (s === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
+        if (s === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
+    }
+
+    async function fetchPrice(s) {
+        try {
+            const r = await fetch(`https://cryptoprices.cc/${s.toUpperCase()}`);
+            const t = await r.text();
+            return parseFloat(t.trim()) || 0;
+        } catch { return 0; }
+    }
+
+    async function fetchAllPrices() {
+        document.getElementById('status').innerText = "Updating...";
+        prices.btc = await fetchPrice('BTC');
+        prices.eth = await fetchPrice('ETH');
+        for (let s of watchlist) prices[s] = await fetchPrice(s);
+        renderWatchlist();
+        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
+    }
+
+    async function addCoin() {
+        let s = document.getElementById('search-input').value.toUpperCase().trim();
+        if (!s || watchlist.includes(s)) return;
+        let p = await fetchPrice(s);
+        if (p > 0) {
+            watchlist.push(s); prices[s] = p;
+            localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
+            renderWatchlist();
+            document.getElementById('search-input').value = "";
+        }
+    }
+
+    function removeCoin(s) {
+        watchlist = watchlist.filter(i => i !== s);
+        localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
+        renderWatchlist();
+    }
+
+    function renderWatchlist() {
+        let container = document.getElementById('watchlist');
+        container.innerHTML = "";
+        watchlist.forEach(s => {
+            container.innerHTML += `<div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><label>${s}</label><div class="input-wrapper"><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"><span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span></div></div><div class="delete-btn" onclick="removeCoin('${s}')">×</div></div>`;
+        });
+    }
+
+    window.onload = fetchAllPrices;
+</script>
+</body>
+</html>
