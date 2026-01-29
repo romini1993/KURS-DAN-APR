@@ -73,16 +73,38 @@
         .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
         .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
         .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; font-weight: 500; }
-        .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        
+        .apr-card { 
+            padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.05); position: relative;
+        }
+        .copy-icon {
+            position: absolute; top: 10px; right: 10px; font-size: 14px; 
+            cursor: pointer; opacity: 0.6; padding: 5px;
+        }
+        .copy-icon:active { transform: scale(0.9); opacity: 1; }
+
         .hari { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
         .minggu { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
         .bulan { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
         .tahun { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
         .title { font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8; }
+        
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 150px; background-color: var(--accent); color: #0f172a;
+            text-align: center; border-radius: 10px; padding: 10px; position: fixed;
+            z-index: 200; left: 50%; bottom: 85px; transform: translateX(-50%);
+            font-weight: bold; font-size: 12px;
+        }
+        #toast.show { visibility: visible; animation: fadeinout 2s; }
+        @keyframes fadeinout { from {opacity: 0;} 20% {opacity: 1;} 80% {opacity: 1;} to {opacity: 0;} }
     </style>
 </head>
 <body>
+
+<div id="toast">Berhasil dicopy!</div>
 
 <div class="container">
     <div id="page-kurs" class="page active">
@@ -155,21 +177,25 @@
 
         <div style="margin-top: 25px;">
             <div class="apr-card hari">
+                <span class="copy-icon" onclick="copyVal('harian-apr')">📋</span>
                 <span class="title">Estimasi Harian</span>
                 <span id="harian-apr" class="val">0</span>
                 <span id="harian-idr" class="sub-val"></span>
             </div>
             <div class="apr-card minggu">
+                <span class="copy-icon" onclick="copyVal('mingguan-apr')">📋</span>
                 <span class="title">Estimasi Mingguan</span>
                 <span id="mingguan-apr" class="val">0</span>
                 <span id="mingguan-idr" class="sub-val"></span>
             </div>
             <div class="apr-card bulan">
+                <span class="copy-icon" onclick="copyVal('bulanan-apr')">📋</span>
                 <span class="title">Estimasi Bulanan</span>
                 <span id="bulanan-apr" class="val">0</span>
                 <span id="bulanan-idr" class="sub-val"></span>
             </div>
             <div class="apr-card tahun">
+                <span class="copy-icon" onclick="copyVal('tahunan-apr')">📋</span>
                 <span class="title">Estimasi Tahunan</span>
                 <span id="tahunan-apr" class="val">0</span>
                 <span id="tahunan-idr" class="sub-val"></span>
@@ -195,19 +221,27 @@
     let prices = { btc: 0, eth: 0 };
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
 
-    // Fungsi format angka dengan koma (untuk output)
     function formatOutput(num, dec) {
         if (num === 0) return "";
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
     }
 
-    // Fungsi format mata uang khusus APR (IDR pake titik, USD pake koma)
     function formatCurrencyAPR(angka, type) {
         if (type === 'IDR') {
             return "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(angka));
         } else {
             return "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(angka);
         }
+    }
+
+    // Fungsi Copy
+    function copyVal(id) {
+        let text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            let toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+        });
     }
 
     // --- LOGIKA KURS ---
@@ -238,7 +272,7 @@
         }
     }
 
-    // --- LOGIKA APR (DENGAN KURS RUPIAH OTOMATIS) ---
+    // --- LOGIKA APR ---
     let currentCurrencyAPR = 'IDR';
     function setCurrencyAPR(type) {
         currentCurrencyAPR = type;
@@ -251,18 +285,14 @@
     function hitungAPR() {
         let elSaldo = document.getElementById('saldo-apr');
         let elBunga = document.getElementById('bunga-apr');
-        
         let rawSaldo = elSaldo.value.replace(/,/g, '');
         let rawBunga = elBunga.value.replace(/,/g, '');
-        
         let saldo = parseFloat(rawSaldo) || 0;
         let bunga = parseFloat(rawBunga) || 0;
 
-        // Auto-format input dengan koma
         if (!elSaldo.value.includes('.')) elSaldo.value = formatOutput(saldo, 4);
         if (!elBunga.value.includes('.')) elBunga.value = formatOutput(bunga, 2);
 
-        // Tampilan kurs IDR di bawah input saldo (kalo lagi mode USD)
         if (currentCurrencyAPR === 'USD') {
             document.getElementById('cek-saldo-apr').innerText = formatCurrencyAPR(saldo * usdToIdr, 'IDR');
         } else {
@@ -280,18 +310,23 @@
         for (let key in periods) {
             let val = periods[key];
             document.getElementById(`${key}-apr`).innerText = formatCurrencyAPR(val, currentCurrencyAPR);
-            
-            // Tambahin kurs rupiah di bawah hasil kalau lagi mode USD
             let subEl = document.getElementById(`${key}-idr`);
             if (currentCurrencyAPR === 'USD' && val > 0) {
                 subEl.innerText = "≈ " + formatCurrencyAPR(val * usdToIdr, 'IDR');
-            } else {
-                subEl.innerText = "";
-            }
+            } else { subEl.innerText = ""; }
         }
     }
 
-    // --- FETCH DATA ---
+    // --- FETCH DATA & LOGOS ---
+    function getLogo(sym) {
+        const s = sym.toLowerCase();
+        // LOGO KHUSUS DEEP SESUAI REQUEST
+        if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
+        if (s === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
+        if (s === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
+    }
+
     async function fetchPrice(s) {
         try {
             const r = await fetch(`https://cryptoprices.cc/${s.toUpperCase()}`);
@@ -302,22 +337,11 @@
 
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
-        // Ambil Kurs USD ke IDR terbaru (Opsional, gua patok 16250 dulu)
         prices.btc = await fetchPrice('BTC');
         prices.eth = await fetchPrice('ETH');
         for (let s of watchlist) prices[s] = await fetchPrice(s);
         renderWatchlist();
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
-    }
-
-    function getLogo(sym) {
-        const s = sym.toLowerCase();
-        const map = {
-            'sui': 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png',
-            'deep': 'https://assets.coingecko.com/coins/images/40049/large/deep.png',
-            'sol': 'https://assets.coingecko.com/coins/images/4128/large/solana.png'
-        };
-        return map[s] || `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
     }
 
     async function addCoin() {
