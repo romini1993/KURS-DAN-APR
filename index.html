@@ -49,20 +49,28 @@
         
         .coin-card { 
             background: var(--card); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; 
-            display: flex; align-items: center; gap: 15px; border: 1px solid #334155; 
+            display: flex; align-items: center; gap: 12px; border: 1px solid #334155; 
+            position: relative;
         }
         .coin-info { flex: 1; }
         .coin-info label { display: block; font-size: 11px; color: var(--subtext); font-weight: bold; margin-bottom: 2px; }
         .logo-wrapper { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0f172a; border: 1px solid #475569; flex-shrink: 0; }
         .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         
+        .input-wrapper { display: flex; align-items: center; gap: 8px; }
         input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; padding: 0; }
         
+        .copy-btn-kurs { 
+            color: var(--subtext); font-size: 16px; cursor: pointer; padding: 5px; 
+            opacity: 0.5; transition: 0.2s;
+        }
+        .copy-btn-kurs:active { transform: scale(0.8); opacity: 1; color: var(--accent); }
+
         .search-section { margin-top: 30px; border-top: 1px dashed #334155; padding-top: 20px; }
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
         .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
         .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
-        .delete-btn { color: #ef4444; font-size: 24px; cursor: pointer; padding-left: 10px; }
+        .delete-btn { color: #ef4444; font-size: 24px; cursor: pointer; padding-left: 5px; }
         .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
 
         /* APR STYLES */
@@ -73,17 +81,7 @@
         .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
         .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
         .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; font-weight: 500; }
-        
-        .apr-card { 
-            padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; 
-            border: 1px solid rgba(255,255,255,0.05); position: relative;
-        }
-        .copy-icon {
-            position: absolute; top: 10px; right: 10px; font-size: 14px; 
-            cursor: pointer; opacity: 0.6; padding: 5px;
-        }
-        .copy-icon:active { transform: scale(0.9); opacity: 1; }
-
+        .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .hari { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
         .minggu { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
         .bulan { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
@@ -104,7 +102,7 @@
 </head>
 <body>
 
-<div id="toast">Berhasil dicopy!</div>
+<div id="toast">Copied!</div>
 
 <div class="container">
     <div id="page-kurs" class="page active">
@@ -118,28 +116,40 @@
                 <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
                 <div class="coin-info">
                     <label>IDR (Rupiah)</label>
-                    <input type="text" id="idr" inputmode="decimal" placeholder="0" oninput="calculateKurs('idr')">
+                    <div class="input-wrapper">
+                        <input type="text" id="idr" inputmode="decimal" placeholder="0" oninput="calculateKurs('idr')">
+                        <span class="copy-btn-kurs" onclick="copyValKurs('idr')">📋</span>
+                    </div>
                 </div>
             </div>
             <div class="coin-card" style="border-left: 5px solid #3b82f6;">
                 <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-united-states.svg"></div>
                 <div class="coin-info">
                     <label>USD (Dollar)</label>
-                    <input type="text" id="usd" inputmode="decimal" placeholder="0" oninput="calculateKurs('usd')">
+                    <div class="input-wrapper">
+                        <input type="text" id="usd" inputmode="decimal" placeholder="0" oninput="calculateKurs('usd')">
+                        <span class="copy-btn-kurs" onclick="copyValKurs('usd')">📋</span>
+                    </div>
                 </div>
             </div>
             <div class="coin-card" style="border-left: 5px solid #f7931a;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
                 <div class="coin-info">
                     <label>BTC (Bitcoin)</label>
-                    <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
+                    <div class="input-wrapper">
+                        <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
+                        <span class="copy-btn-kurs" onclick="copyValKurs('btc')">📋</span>
+                    </div>
                 </div>
             </div>
             <div class="coin-card" style="border-left: 5px solid #627eea;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
                 <div class="coin-info">
                     <label>ETH (Ethereum)</label>
-                    <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
+                    <div class="input-wrapper">
+                        <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
+                        <span class="copy-btn-kurs" onclick="copyValKurs('eth')">📋</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -176,30 +186,10 @@
         </div>
 
         <div style="margin-top: 25px;">
-            <div class="apr-card hari">
-                <span class="copy-icon" onclick="copyVal('harian-apr')">📋</span>
-                <span class="title">Estimasi Harian</span>
-                <span id="harian-apr" class="val">0</span>
-                <span id="harian-idr" class="sub-val"></span>
-            </div>
-            <div class="apr-card minggu">
-                <span class="copy-icon" onclick="copyVal('mingguan-apr')">📋</span>
-                <span class="title">Estimasi Mingguan</span>
-                <span id="mingguan-apr" class="val">0</span>
-                <span id="mingguan-idr" class="sub-val"></span>
-            </div>
-            <div class="apr-card bulan">
-                <span class="copy-icon" onclick="copyVal('bulanan-apr')">📋</span>
-                <span class="title">Estimasi Bulanan</span>
-                <span id="bulanan-apr" class="val">0</span>
-                <span id="bulanan-idr" class="sub-val"></span>
-            </div>
-            <div class="apr-card tahun">
-                <span class="copy-icon" onclick="copyVal('tahunan-apr')">📋</span>
-                <span class="title">Estimasi Tahunan</span>
-                <span id="tahunan-apr" class="val">0</span>
-                <span id="tahunan-idr" class="sub-val"></span>
-            </div>
+            <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
+            <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
+            <div class="apr-card bulan"><span class="title">Estimasi Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
+            <div class="apr-card tahun"><span class="title">Estimasi Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
         </div>
     </div>
 </div>
@@ -226,18 +216,11 @@
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
     }
 
-    function formatCurrencyAPR(angka, type) {
-        if (type === 'IDR') {
-            return "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(angka));
-        } else {
-            return "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(angka);
-        }
-    }
-
-    // Fungsi Copy
-    function copyVal(id) {
-        let text = document.getElementById(id).innerText;
-        navigator.clipboard.writeText(text).then(() => {
+    // Fungsi Copy Kurs
+    function copyValKurs(id) {
+        let val = document.getElementById(id).value.replace(/,/g, '');
+        if (!val || val == "0") return;
+        navigator.clipboard.writeText(val).then(() => {
             let toast = document.getElementById("toast");
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
@@ -293,34 +276,22 @@
         if (!elSaldo.value.includes('.')) elSaldo.value = formatOutput(saldo, 4);
         if (!elBunga.value.includes('.')) elBunga.value = formatOutput(bunga, 2);
 
-        if (currentCurrencyAPR === 'USD') {
-            document.getElementById('cek-saldo-apr').innerText = formatCurrencyAPR(saldo * usdToIdr, 'IDR');
-        } else {
-            document.getElementById('cek-saldo-apr').innerText = formatCurrencyAPR(saldo, 'IDR');
-        }
-
         const hasilTahun = saldo * (bunga / 100);
-        const periods = {
-            'tahunan': hasilTahun,
-            'bulanan': hasilTahun / 12,
-            'mingguan': hasilTahun / 52,
-            'harian': hasilTahun / 365
-        };
+        const periods = {'tahunan': hasilTahun, 'bulanan': hasilTahun / 12, 'mingguan': hasilTahun / 52, 'harian': hasilTahun / 365};
+        
+        document.getElementById('cek-saldo-apr').innerText = (currentCurrencyAPR === 'USD') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo * usdToIdr)) : "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo));
 
         for (let key in periods) {
             let val = periods[key];
-            document.getElementById(`${key}-apr`).innerText = formatCurrencyAPR(val, currentCurrencyAPR);
+            document.getElementById(`${key}-apr`).innerText = (currentCurrencyAPR === 'IDR') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val)) : "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
             let subEl = document.getElementById(`${key}-idr`);
-            if (currentCurrencyAPR === 'USD' && val > 0) {
-                subEl.innerText = "≈ " + formatCurrencyAPR(val * usdToIdr, 'IDR');
-            } else { subEl.innerText = ""; }
+            subEl.innerText = (currentCurrencyAPR === 'USD' && val > 0) ? "≈ Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val * usdToIdr)) : "";
         }
     }
 
-    // --- FETCH DATA & LOGOS ---
+    // --- FETCH & RENDER ---
     function getLogo(sym) {
         const s = sym.toLowerCase();
-        // LOGO KHUSUS DEEP SESUAI REQUEST
         if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
         if (s === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
         if (s === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
@@ -366,7 +337,7 @@
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
         watchlist.forEach(s => {
-            container.innerHTML += `<div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><label>${s}</label><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"></div><div class="delete-btn" onclick="removeCoin('${s}')">×</div></div>`;
+            container.innerHTML += `<div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><label>${s}</label><div class="input-wrapper"><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"><span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span></div></div><div class="delete-btn" onclick="removeCoin('${s}')">×</div></div>`;
         });
     }
 
