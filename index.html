@@ -23,6 +23,7 @@
         
         .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 20px 100px 20px; }
 
+        /* TAB NAVIGATION */
         .tab-bar {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 400px; background: var(--card);
@@ -171,42 +172,4 @@
         </div>
         <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO (Rp)</label>
         <div class="apr-input-box">
-            <input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
-        <div id="cek-saldo-apr" class="terbilang"></div>
-        <label class="apr-label">BUNGA PER TAHUN (%)</label>
-        <div class="apr-input-box">
-            <input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
-        <div style="margin-top: 25px;">
-            <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
-            <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
-            <div class="apr-card bulan"><span class="title">Estimasi Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
-            <div class="apr-card tahun"><span class="title">Estimasi Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
-        </div>
-    </div>
-</div>
-
-<div class="tab-bar">
-    <button class="tab-btn" id="btn-tab-kurs" onclick="switchTab('kurs')"><span>💱</span><span>Kurs</span></button>
-    <button class="tab-btn" id="btn-tab-apr" onclick="switchTab('apr')"><span>💰</span><span>APR</span></button>
-</div>
-
-<script>
-    let usdToIdr = 16250; 
-    let prices = { btc: 0, eth: 0 };
-    let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
-
-    function switchTab(target) {
-        localStorage.setItem('last_active_tab', target);
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        document.getElementById('page-' + target).classList.add('active');
-        document.getElementById('btn-tab-' + target).classList.add('active');
-    }
-
-    function formatOutput(num, dec) {
-        if (!num || num === 0) return "";
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
-    }
+            <input type="text" id="saldo-apr" inputmode
