@@ -376,4 +376,24 @@
         if (!elBunga.value.includes('.')) elBunga.value = formatOutput(bunga, 2);
         const hasilTahun = saldo * (bunga / 100);
         const periods = {'tahunan': hasilTahun, 'bulanan': hasilTahun / 12, 'mingguan': hasilTahun / 52, 'harian': hasilTahun / 365};
-        document.getElementById('cek-saldo-apr').innerText = (currentCurrencyAPR === 'USD') ? "Rp " + new Intl.NumberFormat('id-ID').format(Mat
+        document.getElementById('cek-saldo-apr').innerText = (currentCurrencyAPR === 'USD') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo * usdToIdr)) : "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo));
+        for (let key in periods) {
+            let val = periods[key];
+            document.getElementById(`${key}-apr`).innerText = (currentCurrencyAPR === 'IDR') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val)) : "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+            let subEl = document.getElementById(`${key}-idr`);
+            subEl.innerText = (currentCurrencyAPR === 'USD' && val > 0) ? "≈ Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val * usdToIdr)) : "";
+        }
+    }
+
+    function getLogo(sym) {
+        const s = sym.toLowerCase();
+        if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
+        if (s === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
+        if (s === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
+    }
+
+    window.onload = fetchAllPrices;
+</script>
+</body>
+</html>
