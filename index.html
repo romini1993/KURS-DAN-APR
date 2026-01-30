@@ -17,6 +17,8 @@
             --accent: #38bdf8;
             --text: #f8fafc;
             --subtext: #94a3b8;
+            --up: #4ade80; /* Hijau */
+            --down: #f87171; /* Merah */
         }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
@@ -53,7 +55,14 @@
             position: relative;
         }
         .coin-info { flex: 1; }
-        .coin-info label { display: block; font-size: 11px; color: var(--subtext); font-weight: bold; margin-bottom: 2px; }
+        
+        /* CSS Baru buat Label & Change 24h */
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        .coin-info label { font-size: 11px; color: var(--subtext); font-weight: bold; }
+        .price-change { font-size: 10px; font-weight: 800; border-radius: 4px; padding: 1px 4px; }
+        .price-change.plus { color: var(--up); }
+        .price-change.minus { color: var(--down); }
+
         .logo-wrapper { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0f172a; border: 1px solid #475569; flex-shrink: 0; }
         .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         
@@ -89,7 +98,6 @@
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
         .title { font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8; }
         
-        /* Toast Notification */
         #toast {
             visibility: hidden; min-width: 150px; background-color: var(--accent); color: #0f172a;
             text-align: center; border-radius: 10px; padding: 10px; position: fixed;
@@ -135,7 +143,10 @@
             <div class="coin-card" style="border-left: 5px solid #f7931a;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
                 <div class="coin-info">
-                    <label>BTC (Bitcoin)</label>
+                    <div class="label-row">
+                        <label>BTC (Bitcoin)</label>
+                        <span id="change-btc" class="price-change">--</span>
+                    </div>
                     <div class="input-wrapper">
                         <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
                         <span class="copy-btn-kurs" onclick="copyValKurs('btc')">📋</span>
@@ -145,7 +156,10 @@
             <div class="coin-card" style="border-left: 5px solid #627eea;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
                 <div class="coin-info">
-                    <label>ETH (Ethereum)</label>
+                    <div class="label-row">
+                        <label>ETH (Ethereum)</label>
+                        <span id="change-eth" class="price-change">--</span>
+                    </div>
                     <div class="input-wrapper">
                         <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
                         <span class="copy-btn-kurs" onclick="copyValKurs('eth')">📋</span>
@@ -164,27 +178,17 @@
     </div>
 
     <div id="page-apr" class="page">
-        <div class="header">
-            <h2>💰 Calc APR</h2>
-        </div>
-        
+        <div class="header"><h2>💰 Calc APR</h2></div>
         <label class="apr-label">MATA UANG</label>
         <div class="currency-switch">
             <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
             <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
-        
         <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO (Rp)</label>
-        <div class="apr-input-box">
-            <input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
+        <div class="apr-input-box"><input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div id="cek-saldo-apr" class="terbilang"></div>
-        
         <label class="apr-label">BUNGA PER TAHUN (%)</label>
-        <div class="apr-input-box">
-            <input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
-
+        <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div style="margin-top: 25px;">
             <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
             <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
@@ -209,6 +213,7 @@
 
     let usdToIdr = 16250; 
     let prices = { btc: 0, eth: 0 };
+    let changes = { btc: 0, eth: 0 }; // Simpan data persentase
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
 
     function formatOutput(num, dec) {
@@ -216,7 +221,6 @@
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
     }
 
-    // Fungsi Copy Kurs
     function copyValKurs(id) {
         let val = document.getElementById(id).value.replace(/,/g, '');
         if (!val || val == "0") return;
@@ -227,7 +231,6 @@
         });
     }
 
-    // --- LOGIKA KURS ---
     function calculateKurs(source) {
         let el = document.getElementById(source);
         let rawValue = el.value.replace(/,/g, '');
@@ -243,6 +246,7 @@
         if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
         if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
         if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
+        
         watchlist.forEach(s => {
             if (s !== source) {
                 let target = document.getElementById(s);
@@ -255,7 +259,7 @@
         }
     }
 
-    // --- LOGIKA APR ---
+    // Fungsi APR tetep
     let currentCurrencyAPR = 'IDR';
     function setCurrencyAPR(type) {
         currentCurrencyAPR = type;
@@ -272,15 +276,11 @@
         let rawBunga = elBunga.value.replace(/,/g, '');
         let saldo = parseFloat(rawSaldo) || 0;
         let bunga = parseFloat(rawBunga) || 0;
-
         if (!elSaldo.value.includes('.')) elSaldo.value = formatOutput(saldo, 4);
         if (!elBunga.value.includes('.')) elBunga.value = formatOutput(bunga, 2);
-
         const hasilTahun = saldo * (bunga / 100);
         const periods = {'tahunan': hasilTahun, 'bulanan': hasilTahun / 12, 'mingguan': hasilTahun / 52, 'harian': hasilTahun / 365};
-        
         document.getElementById('cek-saldo-apr').innerText = (currentCurrencyAPR === 'USD') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo * usdToIdr)) : "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(saldo));
-
         for (let key in periods) {
             let val = periods[key];
             document.getElementById(`${key}-apr`).innerText = (currentCurrencyAPR === 'IDR') ? "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(val)) : "$ " + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
@@ -289,7 +289,65 @@
         }
     }
 
-    // --- FETCH & RENDER ---
+    // --- FETCH DATA MODIFIKASI ---
+    async function fetchData(s) {
+        try {
+            // Kita pake API cryptoprices.cc tapi nambahin parameter buat dapet info tambahan kalo tersedia
+            // Jika API utama mati, ini cara paling enteng:
+            const r = await fetch(`https://cryptoprices.cc/${s.toUpperCase()}`);
+            const priceText = await r.text();
+            const currentPrice = parseFloat(priceText.trim());
+
+            // Simulasi/Fetch Change: Karena cryptoprices.cc cuma ngasih harga, 
+            // idealnya pake CoinGecko buat 24h change. Tapi buat simpelnya, 
+            // kita coba hitung change sederhana atau fetch dari source lain.
+            // Di sini gua pake API pendamping buat dapetin % change-nya:
+            const r2 = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${s.toUpperCase()}USDT`);
+            const data2 = await r2.json();
+            
+            return {
+                price: currentPrice,
+                change: parseFloat(data2.priceChangePercent) || 0
+            };
+        } catch (e) { 
+            return { price: 0, change: 0 }; 
+        }
+    }
+
+    async function fetchAllPrices() {
+        document.getElementById('status').innerText = "Updating...";
+        
+        // Update BTC
+        const btcData = await fetchData('BTC');
+        prices.btc = btcData.price;
+        changes.btc = btcData.change;
+        updateChangeUI('btc', changes.btc);
+
+        // Update ETH
+        const ethData = await fetchData('ETH');
+        prices.eth = ethData.price;
+        changes.eth = ethData.change;
+        updateChangeUI('eth', changes.eth);
+
+        // Update Watchlist
+        for (let s of watchlist) {
+            const coinData = await fetchData(s);
+            prices[s] = coinData.price;
+            changes[s] = coinData.change;
+        }
+        
+        renderWatchlist();
+        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
+    }
+
+    function updateChangeUI(id, val) {
+        const el = document.getElementById(`change-${id}`);
+        if (!el) return;
+        const sign = val >= 0 ? "+" : "";
+        el.innerText = `${sign}${val.toFixed(2)}%`;
+        el.className = `price-change ${val >= 0 ? 'plus' : 'minus'}`;
+    }
+
     function getLogo(sym) {
         const s = sym.toLowerCase();
         if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
@@ -298,29 +356,14 @@
         return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
     }
 
-    async function fetchPrice(s) {
-        try {
-            const r = await fetch(`https://cryptoprices.cc/${s.toUpperCase()}`);
-            const t = await r.text();
-            return parseFloat(t.trim()) || 0;
-        } catch { return 0; }
-    }
-
-    async function fetchAllPrices() {
-        document.getElementById('status').innerText = "Updating...";
-        prices.btc = await fetchPrice('BTC');
-        prices.eth = await fetchPrice('ETH');
-        for (let s of watchlist) prices[s] = await fetchPrice(s);
-        renderWatchlist();
-        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
-    }
-
     async function addCoin() {
         let s = document.getElementById('search-input').value.toUpperCase().trim();
         if (!s || watchlist.includes(s)) return;
-        let p = await fetchPrice(s);
-        if (p > 0) {
-            watchlist.push(s); prices[s] = p;
+        let data = await fetchData(s);
+        if (data.price > 0) {
+            watchlist.push(s); 
+            prices[s] = data.price;
+            changes[s] = data.change;
             localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
             renderWatchlist();
             document.getElementById('search-input').value = "";
@@ -337,7 +380,27 @@
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
         watchlist.forEach(s => {
-            container.innerHTML += `<div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><label>${s}</label><div class="input-wrapper"><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"><span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span></div></div><div class="delete-btn" onclick="removeCoin('${s}')">×</div></div>`;
+            const changeVal = changes[s] || 0;
+            const sign = changeVal >= 0 ? "+" : "";
+            const colorClass = changeVal >= 0 ? "plus" : "minus";
+            
+            container.innerHTML += `
+                <div class="coin-card">
+                    <div class="logo-wrapper">
+                        <img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'">
+                    </div>
+                    <div class="coin-info">
+                        <div class="label-row">
+                            <label>${s}</label>
+                            <span class="price-change ${colorClass}">${sign}${changeVal.toFixed(2)}%</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
+                            <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
+                        </div>
+                    </div>
+                    <div class="delete-btn" onclick="removeCoin('${s}')">×</div>
+                </div>`;
         });
     }
 
