@@ -3,47 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CalcPro">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
     <meta name="theme-color" content="#0f172a">
-    <title>CalcPro v8</title>
+    <title>CalcKurs Pro v5</title>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --subtext: #94a3b8; --up: #4ade80; --down: #f87171; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --subtext: #94a3b8;
+            --up: #4ade80;
+            --down: #f87171;
+        }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 400px; padding: 20px 20px 100px 20px; }
-        
+        .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 40px 100px 20px; }
         .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: var(--card); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #334155; z-index: 100; }
-        .tab-btn { background: transparent; border: none; color: var(--subtext); font-weight: bold; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .tab-btn { background: transparent; border: none; color: var(--subtext); font-weight: bold; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .tab-btn.active { color: var(--accent); }
-        
         .page { display: none; }
-        .page.active { display: block; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; }
+        .page.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 0; }
+        h2 { margin: 0; font-size: 22px; color: var(--accent); }
+        .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .coin-row { position: relative; width: 100%; margin-bottom: 12px; }
+        .coin-card { background: var(--card); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; width: 100%; }
+        .coin-info { flex: 1; overflow: hidden; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        .label-row label { font-size: 11px; color: var(--subtext); font-weight: bold; text-transform: uppercase; }
+        .price-change { font-size: 12px; font-weight: 800; min-width: 65px; text-align: right; }
+        .up { color: var(--up); }
+        .down { color: var(--down); }
+        .logo-wrapper { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0f172a; border: 1px solid #475569; flex-shrink: 0; }
+        .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .input-wrapper { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+        input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; padding: 0; }
+        .delete-btn-outside { position: absolute; right: -32px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 28px; cursor: pointer; padding: 5px; }
+        .search-section { margin-top: 30px; border-top: 1px dashed #334155; padding-top: 20px; }
+        .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
+        .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
+        .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
+        .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
         
-        .coin-card { background: var(--card); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; margin-bottom: 10px; }
-        .coin-info { flex: 1; }
-        label { display: block; font-size: 11px; color: var(--subtext); margin-bottom: 4px; text-transform: uppercase; }
-        input { width: 100%; background: transparent; border: none; color: white; font-size: 18px; font-weight: bold; outline: none; }
-
-        .kurs-badge { font-size: 12px; color: var(--accent); background: rgba(56,189,248,0.1); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--accent); }
-        .currency-switch { display: flex; gap: 8px; margin-bottom: 15px; background: var(--card); padding: 4px; border-radius: 12px; }
-        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: var(--subtext); font-weight: bold; }
+        /* APR Style */
+        .currency-switch { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
+        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
         .currency-switch button.active { background: var(--accent); color: #0f172a; }
-
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .apr-card { padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .apr-card span { display: block; }
-        .apr-card .title { font-size: 10px; font-weight: bold; opacity: 0.7; }
-        .apr-card .val { font-size: 16px; font-weight: 800; margin: 5px 0; }
-        .apr-card .sub { font-size: 10px; opacity: 0.6; }
-
-        .harian { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
-        .mingguan { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
-        .bulanan { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
-        .tahunan { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
-
-        .status { font-size: 10px; color: var(--subtext); text-align: center; margin-top: 20px; }
+        .apr-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--subtext); }
+        .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
+        .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
+        .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
+        .title { font-size: 11px; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
+        .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -51,163 +69,268 @@
 <div class="container">
     <div id="page-kurs" class="page active">
         <div class="header">
-            <h2 style="color:var(--accent)">💱 Kurs</h2>
-            <button class="refresh-btn" onclick="fetchAll()">🔄 Update</button>
+            <h2>💱 Calc Kurs Pro</h2>
+            <button class="refresh-btn" onclick="fetchAllPrices()">🔄 Update</button>
         </div>
-        <div class="coin-card"><div class="coin-info"><label>IDR</label><input type="text" id="idr" inputmode="decimal" oninput="kalkulasi('idr')"></div></div>
-        <div class="coin-card"><div class="coin-info"><label>USD</label><input type="text" id="usd" inputmode="decimal" oninput="kalkulasi('usd')"></div></div>
-        <div class="coin-card"><div class="coin-info"><label>BTC</label><input type="text" id="btc" inputmode="decimal" oninput="kalkulasi('btc')"></div></div>
-        <div class="coin-card"><div class="coin-info"><label>ETH</label><input type="text" id="eth" inputmode="decimal" oninput="kalkulasi('eth')"></div></div>
-        <div id="watchlist-area"></div>
+
+        <div id="fixed-list">
+            <div class="coin-card" style="border-left: 5px solid #ef4444; margin-bottom:12px;">
+                <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
+                <div class="coin-info">
+                    <div class="label-row"><label>IDR (Rupiah)</label></div>
+                    <div class="input-wrapper"><input type="text" id="idr" inputmode="decimal" placeholder="0" oninput="calculateKurs('idr')"></div>
+                </div>
+            </div>
+            <div class="coin-card" style="border-left: 5px solid #3b82f6; margin-bottom:12px;">
+                <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-united-states.svg"></div>
+                <div class="coin-info">
+                    <div class="label-row"><label>USD (Dollar)</label></div>
+                    <div class="input-wrapper"><input type="text" id="usd" inputmode="decimal" placeholder="0" oninput="calculateKurs('usd')"></div>
+                </div>
+            </div>
+            <div class="coin-card" style="border-left: 5px solid #f7931a; margin-bottom:12px;">
+                <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
+                <div class="coin-info">
+                    <div class="label-row"><label>BTC (Bitcoin)</label></div>
+                    <div class="input-wrapper">
+                        <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
+                        <span id="change-btc" class="price-change">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="coin-card" style="border-left: 5px solid #627eea; margin-bottom:12px;">
+                <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
+                <div class="coin-info">
+                    <div class="label-row"><label>ETH (Ethereum)</label></div>
+                    <div class="input-wrapper">
+                        <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
+                        <span id="change-eth" class="price-change">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="watchlist"></div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Tambah koin...">
+                <button class="add-btn" onclick="addCoin()">Tambah</button>
+            </div>
+            <div id="status" class="status-info">Ready, Bro!</div>
+        </div>
     </div>
 
     <div id="page-apr" class="page">
-        <div class="header">
-            <h2 style="color:var(--accent)">💰 APR</h2>
-            <div id="rate-display" class="kurs-badge">Rate: Rp ...</div>
-        </div>
+        <div class="header"><h2>💰 Calc APR</h2></div>
+        <label class="apr-label">MATA UANG</label>
         <div class="currency-switch">
-            <button id="btn-idr" onclick="setMode('IDR')">IDR</button>
-            <button id="btn-usd" onclick="setMode('USD')">USD</button>
+            <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
+            <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
-        <label>Saldo</label>
-        <div class="coin-card"><input type="text" id="apr-saldo" inputmode="decimal" oninput="hitung()"></div>
-        <label>Bunga (%)</label>
-        <div class="coin-card"><input type="text" id="apr-bunga" inputmode="decimal" oninput="hitung()"></div>
-        
-        <div class="result-grid">
-            <div class="apr-card harian"><span class="title">HARIAN</span><span id="res-h-val" class="val">0</span><span id="res-h-sub" class="sub"></span></div>
-            <div class="apr-card mingguan"><span class="title">MINGGUAN</span><span id="res-m-val" class="val">0</span><span id="res-m-sub" class="sub"></span></div>
-            <div class="apr-card bulanan"><span class="title">BULANAN</span><span id="res-b-val" class="val">0</span><span id="res-b-sub" class="sub"></span></div>
-            <div class="apr-card tahunan"><span class="title">TAHUNAN</span><span id="res-t-val" class="val">0</span><span id="res-t-sub" class="sub"></span></div>
+        <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO</label>
+        <div class="apr-input-box"><input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
+        <div id="cek-saldo-apr" class="terbilang"></div>
+        <label class="apr-label">BUNGA PER TAHUN (%)</label>
+        <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
+        <div style="margin-top: 25px;">
+            <div class="apr-card" style="background:rgba(56,189,248,0.1); color:#38bdf8;"><span class="title">Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
+            <div class="apr-card" style="background:rgba(167,139,250,0.1); color:#a78bfa;"><span class="title">Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
+            <div class="apr-card" style="background:rgba(74,222,128,0.1); color:#4ade80;"><span class="title">Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
+            <div class="apr-card" style="background:rgba(251,191,36,0.1); color:#fbbf24;"><span class="title">Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
         </div>
     </div>
-
-    <div id="msg" class="status">Ready...</div>
 </div>
 
 <div class="tab-bar">
-    <button id="t-kurs" class="tab-btn active" onclick="tab('kurs')"><span>💱</span><span>Kurs</span></button>
-    <button id="t-apr" class="tab-btn" onclick="tab('apr')"><span>💰</span><span>APR</span></button>
+    <button class="tab-btn active" onclick="switchTab('kurs', this)"><span>💱</span><span>Kurs</span></button>
+    <button class="tab-btn" onclick="switchTab('apr', this)"><span>💰</span><span>APR</span></button>
 </div>
 
 <script>
-    // DATA STATE
-    let rateUSD = parseFloat(localStorage.getItem('saved_rate')) || 16350;
-    let btcPrice = 0, ethPrice = 0;
-    let modeAPR = localStorage.getItem('mode_apr') || 'IDR';
+    let usdToIdr = 16250; 
+    let prices = { btc: 0, eth: 0 };
+    let changes = { btc: 0, eth: 0 }; 
+    let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
+    let lastSource = 'usd'; // Default awal
+    let lastRawValue = "0";
 
-    // TAB SYSTEM
-    function tab(name) {
-        localStorage.setItem('last_tab', name);
+    function switchTab(target, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('page-' + name).classList.add('active');
-        document.getElementById('t-' + name).classList.add('active');
+        document.getElementById('page-' + target).classList.add('active');
+        btn.classList.add('active');
     }
 
-    // FORMATTER
-    function fmt(n, d=0) {
-        if(!n || n==0) return "";
-        return new Intl.NumberFormat('en-US', {maximumFractionDigits: d}).format(n);
+    function formatOutput(num, dec) {
+        if (num === 0) return "";
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
     }
 
-    // FETCH DATA
-    async function fetchAll() {
-        document.getElementById('msg').innerText = "Updating data...";
-        try {
-            // Get USD/IDR from a stable source
-            const r1 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTIDRT');
-            const d1 = await r1.json();
-            if(d1.price) rateUSD = parseFloat(d1.price);
-
-            const r2 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-            const d2 = await r2.json();
-            if(d2.price) btcPrice = parseFloat(d2.price);
-
-            const r3 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
-            const d3 = await r3.json();
-            if(d3.price) ethPrice = parseFloat(d3.price);
-
-            localStorage.setItem('saved_rate', rateUSD);
-            document.getElementById('rate-display').innerText = "Rate: Rp " + Math.round(rateUSD).toLocaleString('id-ID');
-            document.getElementById('msg').innerText = "Update: " + new Date().toLocaleTimeString();
-            hitung();
-        } catch (e) {
-            document.getElementById('msg').innerText = "Offline / Error API";
-        }
-    }
-
-    // KURS LOGIC
-    function kalkulasi(src) {
-        let input = document.getElementById(src);
-        let val = parseFloat(input.value.replace(/,/g, '')) || 0;
-        let usdBase = 0;
-
-        if(src === 'idr') usdBase = val / rateUSD;
-        else if(src === 'usd') usdBase = val;
-        else if(src === 'btc') usdBase = val * btcPrice;
-        else if(src === 'eth') usdBase = val * ethPrice;
-
-        if(src !== 'idr') document.getElementById('idr').value = fmt(usdBase * rateUSD, 0);
-        if(src !== 'usd') document.getElementById('usd').value = fmt(usdBase, 2);
-        if(src !== 'btc') document.getElementById('btc').value = fmt(usdBase / btcPrice, 6);
-        if(src !== 'eth') document.getElementById('eth').value = fmt(usdBase / ethPrice, 6);
-    }
-
-    // APR LOGIC
-    function setMode(m) {
-        modeAPR = m;
-        localStorage.setItem('mode_apr', m);
-        document.getElementById('btn-idr').className = m === 'IDR' ? 'active' : '';
-        document.getElementById('btn-usd').className = m === 'USD' ? 'active' : '';
-        hitung();
-    }
-
-    function hitung() {
-        let sStr = document.getElementById('apr-saldo').value;
-        let bStr = document.getElementById('apr-bunga').value;
+    function calculateKurs(source) {
+        let el = document.getElementById(source);
+        if (!el) return;
         
-        localStorage.setItem('last_saldo', sStr);
-        localStorage.setItem('last_bunga', bStr);
+        let raw = el.value.replace(/,/g, '');
+        lastSource = source; // Ingetin kolom mana yang diisi
+        lastRawValue = raw; // Ingetin angka mentahnya
 
-        let s = parseFloat(sStr.replace(/,/g, '')) || 0;
-        let b = parseFloat(bStr.replace(/,/g, '')) || 0;
+        if (!raw || raw === "0") {
+            document.querySelectorAll('#page-kurs input').forEach(i => { if(i.id !== source) i.value = ""; });
+            return;
+        }
+        
+        let val = parseFloat(raw) || 0;
+        let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
 
-        let tahunan = s * (b/100);
-        let data = {
-            t: tahunan,
-            b: tahunan / 12,
-            m: tahunan / 52,
-            h: tahunan / 365
-        };
-
-        for(let k in data) {
-            let v = data[k];
-            let elVal = document.getElementById(`res-${k}-val`);
-            let elSub = document.getElementById(`res-${k}-sub`);
-
-            if(modeAPR === 'IDR') {
-                elVal.innerText = "Rp " + Math.floor(v).toLocaleString('id-ID');
-                elSub.innerText = "";
-            } else {
-                elVal.innerText = "$ " + v.toLocaleString('en-US', {maximumFractionDigits:2});
-                elSub.innerText = "≈ Rp " + Math.floor(v * rateUSD).toLocaleString('id-ID');
+        // Update 4 koin utama
+        if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
+        if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
+        if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
+        if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
+        
+        // Update watchlist koin tambahan
+        watchlist.forEach(s => {
+            if (s !== source) {
+                let target = document.getElementById(s);
+                if (target) target.value = formatOutput(baseUsd / (prices[s] || 1), 6);
             }
+        });
+
+        // Format tampilan kolom yang lagi diketik
+        if (!el.value.includes('.')) {
+            let dec = (source === 'idr' ? 0 : (source === 'usd' ? 4 : 8));
+            el.value = formatOutput(val, dec);
         }
     }
 
-    // STARTUP
-    window.onload = () => {
-        // Restore values
-        document.getElementById('apr-saldo').value = localStorage.getItem('last_saldo') || "";
-        document.getElementById('apr-bunga').value = localStorage.getItem('last_bunga') || "";
+    async function fetchPriceData(s) {
+        try {
+            const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT`);
+            const d = await r.json();
+            if (d.result?.list?.[0]) {
+                const t = d.result.list[0];
+                const last = parseFloat(t.lastPrice);
+                const prev = parseFloat(t.prevPrice24h);
+                return { price: last, change: ((last - prev) / prev) * 100 };
+            }
+        } catch { return { price: 0, change: 0 }; }
+        return { price: 0, change: 0 };
+    }
+
+    async function fetchAllPrices() {
+        document.getElementById('status').innerText = "Updating...";
         
-        const last = localStorage.getItem('last_tab') || 'kurs';
-        tab(last);
-        setMode(modeAPR);
-        fetchAll();
-    };
+        // Fetch BTC & ETH
+        const b1 = await fetchPriceData('BTC');
+        prices.btc = b1.price; changes.btc = b1.change;
+        updatePriceUI('btc', b1.change);
+
+        const e1 = await fetchPriceData('ETH');
+        prices.eth = e1.price; changes.eth = e1.change;
+        updatePriceUI('eth', e1.change);
+
+        // Fetch Watchlist
+        for (let s of watchlist) {
+            const res = await fetchPriceData(s);
+            prices[s] = res.price; changes[s] = res.change;
+        }
+
+        // Render ulang watchlist koin tambahan
+        renderWatchlist();
+        
+        // RE-CALCULATE: Ini kunci biar angka ga balik nol!
+        if (lastRawValue !== "0" && lastRawValue !== "") {
+            calculateKurs(lastSource);
+        }
+
+        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
+    }
+
+    function updatePriceUI(id, change) {
+        let el = document.getElementById(`change-${id}`);
+        if (!el) return;
+        el.innerText = (change >= 0 ? "+" : "") + change.toFixed(2) + "%";
+        el.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
+    }
+
+    async function addCoin() {
+        let s = document.getElementById('search-input').value.toUpperCase().trim();
+        if (!s || watchlist.includes(s)) return;
+        let data = await fetchPriceData(s);
+        if (data.price > 0) {
+            watchlist.push(s); 
+            prices[s] = data.price; changes[s] = data.change;
+            localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
+            renderWatchlist();
+            if (lastRawValue !== "0") calculateKurs(lastSource);
+            document.getElementById('search-input').value = "";
+        }
+    }
+
+    function removeCoin(s) {
+        watchlist = watchlist.filter(i => i !== s);
+        localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
+        renderWatchlist();
+        if (lastRawValue !== "0") calculateKurs(lastSource);
+    }
+
+    function renderWatchlist() {
+        let container = document.getElementById('watchlist');
+        container.innerHTML = "";
+        watchlist.forEach(s => {
+            const chg = changes[s] || 0;
+            container.innerHTML += `
+                <div class="coin-row">
+                    <div class="coin-card">
+                        <div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div>
+                        <div class="coin-info">
+                            <div class="label-row"><label>${s}</label></div>
+                            <div class="input-wrapper">
+                                <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
+                                <span class="price-change ${chg >= 0 ? 'up' : 'down'}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="delete-btn-outside" onclick="removeCoin('${s}')">×</div>
+                </div>`;
+        });
+    }
+
+    function getLogo(s) {
+        const sym = s.toLowerCase();
+        if (sym === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
+        if (sym === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
+        if (sym === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${sym}.png`;
+    }
+
+    // APR Logic Tetap Sama
+    let curAPR = 'IDR';
+    function setCurrencyAPR(t) { 
+        curAPR = t; 
+        document.getElementById('btn-idr-apr').className = t==='IDR'?'active':''; 
+        document.getElementById('btn-usd-apr').className = t==='USD'?'active':''; 
+        hitungAPR(); 
+    }
+    function hitungAPR() {
+        let sInput = document.getElementById('saldo-apr');
+        let bInput = document.getElementById('bunga-apr');
+        let s = parseFloat(sInput.value.replace(/,/g,'')) || 0;
+        let b = parseFloat(bInput.value.replace(/,/g,'')) || 0;
+        
+        if (!sInput.value.includes('.')) sInput.value = formatOutput(s, 0);
+        
+        let thn = s * (b/100);
+        let p = { tahunan: thn, bulanan: thn/12, mingguan: thn/52, harian: thn/365 };
+        document.getElementById('cek-saldo-apr').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(curAPR==='USD'?s*usdToIdr:s));
+        for(let k in p) {
+            document.getElementById(k+'-apr').innerText = (curAPR==='IDR'?'Rp ':'$ ') + (curAPR==='IDR' ? new Intl.NumberFormat('id-ID').format(Math.floor(p[k])) : formatOutput(p[k], 2));
+            document.getElementById(k+'-idr').innerText = (curAPR==='USD' && p[k]>0) ? "≈ Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(p[k]*usdToIdr)) : "";
+        }
+    }
+
+    window.onload = fetchAllPrices;
 </script>
 </body>
 </html>
