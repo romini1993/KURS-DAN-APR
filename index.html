@@ -217,7 +217,7 @@
     }
 
     let usdToIdr = 16250; 
-    let prices = { btc: 0, eth: 0 };
+    let prices = { btc: 1, eth: 1 }; // Inisialisasi 1 biar ga pembagian nol
     let changes = { btc: 0, eth: 0 }; 
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
 
@@ -245,19 +245,24 @@
             return;
         }
         let val = parseFloat(rawValue) || 0;
-        let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
+        
+        // Proteksi harga supaya ga 0 pas perhitungan
+        let getPrice = (id) => prices[id] || 1;
+
+        let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * getPrice(source));
 
         if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
         if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
-        if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
-        if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
+        if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / getPrice('btc'), 8);
+        if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / getPrice('eth'), 8);
+        
         watchlist.forEach(s => {
             if (s !== source) {
                 let target = document.getElementById(s);
-                if (target) target.value = formatOutput(baseUsd / (prices[s] || 1), 6);
+                if (target) target.value = formatOutput(baseUsd / getPrice(s), 6);
             }
         });
-        // Biar nggak ganggu ngetik, format koma cuma pas ga ada titik (decimal)
+
         if (!el.value.includes('.')) {
             let d = (source === 'idr') ? 0 : (source === 'usd' ? 4 : 8);
             el.value = formatOutput(val, d);
@@ -266,7 +271,8 @@
 
     async function fetchPriceData(s) {
         try {
-            const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT`);
+            // Ditambah t=Date.now() biar ga kena blokir cache DNS/Browser
+            const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT&t=${Date.now()}`);
             const d = await r.json();
             if (d.result && d.result.list && d.result.list.length > 0) {
                 const t = d.result.list[0];
@@ -275,10 +281,11 @@
                 const change = ((last - prev) / prev) * 100;
                 return { price: last, change: change };
             }
-        } catch { 
-            return { price: 0, change: 0 };
+        } catch (e) { 
+            console.error("DNS/Network Error for: " + s);
+            return null; // Return null biar sistem tau ini gagal
         }
-        return { price: 0, change: 0 };
+        return null;
     }
 
     function updatePriceUI(id, change) {
@@ -291,19 +298,21 @@
 
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
-        const btcData = await fetchPriceData('BTC');
-        prices.btc = btcData.price; changes.btc = btcData.change;
-        updatePriceUI('btc', btcData.change);
-
-        const ethData = await fetchPriceData('ETH');
-        prices.eth = ethData.price; changes.eth = ethData.change;
-        updatePriceUI('eth', ethData.change);
-
-        for (let s of watchlist) {
+        
+        // Pake Promise.all biar lebih cepet tapi tetep handle error per coin
+        const coinsToFetch = ['btc', 'eth', ...watchlist];
+        
+        for (let s of coinsToFetch) {
             const data = await fetchPriceData(s);
-            prices[s] = data.price;
-            changes[s] = data.change;
+            if (data) {
+                prices[s.toLowerCase()] = data.price;
+                changes[s.toLowerCase()] = data.change;
+                if (['btc', 'eth'].includes(s.toLowerCase())) {
+                    updatePriceUI(s.toLowerCase(), data.change);
+                }
+            }
         }
+        
         renderWatchlist();
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
@@ -312,13 +321,15 @@
         let s = document.getElementById('search-input').value.toUpperCase().trim();
         if (!s || watchlist.includes(s)) return;
         let data = await fetchPriceData(s);
-        if (data.price > 0) {
+        if (data && data.price > 0) {
             watchlist.push(s); 
-            prices[s] = data.price;
-            changes[s] = data.change;
+            prices[s.toLowerCase()] = data.price;
+            changes[s.toLowerCase()] = data.change;
             localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
             renderWatchlist();
             document.getElementById('search-input').value = "";
+        } else {
+            alert("Koin ga ketemu atau koneksi bermasalah, Bro!");
         }
     }
 
@@ -332,7 +343,8 @@
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
         watchlist.forEach(s => {
-            const chg = changes[s] || 0;
+            const lowS = s.toLowerCase();
+            const chg = changes[lowS] || 0;
             const sign = chg >= 0 ? "+" : "";
             container.innerHTML += `
                 <div class="coin-row">
@@ -346,8 +358,8 @@
                                 <span class="price-change ${chg >= 0 ? 'up' : 'down'}">${sign}${chg.toFixed(2)}%</span>
                             </div>
                             <div class="input-wrapper">
-                                <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
-                                <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
+                                <input type="text" id="${lowS}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${lowS}')">
+                                <span class="copy-btn-kurs" onclick="copyValKurs('${lowS}')">📋</span>
                             </div>
                         </div>
                     </div>
