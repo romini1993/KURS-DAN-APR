@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="CalcPro">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
     <meta name="theme-color" content="#0f172a">
-    <title>CalcKurs Pro v4</title>
+    <title>CalcKurs Pro v5</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -50,6 +50,7 @@
         .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
         .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
         .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
+        
         /* APR Style */
         .currency-switch { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
         .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
@@ -151,6 +152,8 @@
     let prices = { btc: 0, eth: 0 };
     let changes = { btc: 0, eth: 0 }; 
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
+    let lastSource = 'usd'; // Default awal
+    let lastRawValue = "0";
 
     function switchTab(target, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -166,19 +169,27 @@
 
     function calculateKurs(source) {
         let el = document.getElementById(source);
+        if (!el) return;
+        
         let raw = el.value.replace(/,/g, '');
+        lastSource = source; // Ingetin kolom mana yang diisi
+        lastRawValue = raw; // Ingetin angka mentahnya
+
         if (!raw || raw === "0") {
             document.querySelectorAll('#page-kurs input').forEach(i => { if(i.id !== source) i.value = ""; });
             return;
         }
+        
         let val = parseFloat(raw) || 0;
         let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
 
+        // Update 4 koin utama
         if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
         if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
         if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
         if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
         
+        // Update watchlist koin tambahan
         watchlist.forEach(s => {
             if (s !== source) {
                 let target = document.getElementById(s);
@@ -186,8 +197,10 @@
             }
         });
 
+        // Format tampilan kolom yang lagi diketik
         if (!el.value.includes('.')) {
-            el.value = formatOutput(val, (source === 'idr' ? 0 : (source === 'usd' ? 4 : 8)));
+            let dec = (source === 'idr' ? 0 : (source === 'usd' ? 4 : 8));
+            el.value = formatOutput(val, dec);
         }
     }
 
@@ -207,6 +220,8 @@
 
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
+        
+        // Fetch BTC & ETH
         const b1 = await fetchPriceData('BTC');
         prices.btc = b1.price; changes.btc = b1.change;
         updatePriceUI('btc', b1.change);
@@ -215,11 +230,20 @@
         prices.eth = e1.price; changes.eth = e1.change;
         updatePriceUI('eth', e1.change);
 
+        // Fetch Watchlist
         for (let s of watchlist) {
             const res = await fetchPriceData(s);
             prices[s] = res.price; changes[s] = res.change;
         }
+
+        // Render ulang watchlist koin tambahan
         renderWatchlist();
+        
+        // RE-CALCULATE: Ini kunci biar angka ga balik nol!
+        if (lastRawValue !== "0" && lastRawValue !== "") {
+            calculateKurs(lastSource);
+        }
+
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
 
@@ -239,6 +263,7 @@
             prices[s] = data.price; changes[s] = data.change;
             localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
             renderWatchlist();
+            if (lastRawValue !== "0") calculateKurs(lastSource);
             document.getElementById('search-input').value = "";
         }
     }
@@ -247,6 +272,7 @@
         watchlist = watchlist.filter(i => i !== s);
         localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
         renderWatchlist();
+        if (lastRawValue !== "0") calculateKurs(lastSource);
     }
 
     function renderWatchlist() {
@@ -279,7 +305,7 @@
         return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${sym}.png`;
     }
 
-    // APR Logic
+    // APR Logic Tetap Sama
     let curAPR = 'IDR';
     function setCurrencyAPR(t) { 
         curAPR = t; 
@@ -288,8 +314,13 @@
         hitungAPR(); 
     }
     function hitungAPR() {
-        let s = parseFloat(document.getElementById('saldo-apr').value.replace(/,/g,'')) || 0;
-        let b = parseFloat(document.getElementById('bunga-apr').value.replace(/,/g,'')) || 0;
+        let sInput = document.getElementById('saldo-apr');
+        let bInput = document.getElementById('bunga-apr');
+        let s = parseFloat(sInput.value.replace(/,/g,'')) || 0;
+        let b = parseFloat(bInput.value.replace(/,/g,'')) || 0;
+        
+        if (!sInput.value.includes('.')) sInput.value = formatOutput(s, 0);
+        
         let thn = s * (b/100);
         let p = { tahunan: thn, bulanan: thn/12, mingguan: thn/52, harian: thn/365 };
         document.getElementById('cek-saldo-apr').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(curAPR==='USD'?s*usdToIdr:s));
