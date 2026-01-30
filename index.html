@@ -55,13 +55,15 @@
         .currency-switch { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
         .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
         .currency-switch button.active { background: var(--accent); color: #0f172a; }
-        .apr-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--subtext); }
+        .apr-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .apr-label { display: block; font-weight: 600; font-size: 14px; color: var(--subtext); }
         .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
         .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
         .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
         .title { font-size: 11px; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
         .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; }
+        #rate-info { font-size: 11px; color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -123,15 +125,18 @@
 
     <div id="page-apr" class="page">
         <div class="header"><h2>💰 Calc APR</h2></div>
-        <label class="apr-label">MATA UANG</label>
+        <div class="apr-header-row">
+            <label class="apr-label">MATA UANG</label>
+            <span id="rate-info">Rate: Loading...</span>
+        </div>
         <div class="currency-switch">
             <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
             <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
-        <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO</label>
+        <label id="label-saldo-apr" class="apr-label" style="margin-bottom:8px;">JUMLAH SALDO</label>
         <div class="apr-input-box"><input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div id="cek-saldo-apr" class="terbilang"></div>
-        <label class="apr-label">BUNGA PER TAHUN (%)</label>
+        <label class="apr-label" style="margin-bottom:8px;">BUNGA PER TAHUN (%)</label>
         <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div style="margin-top: 25px;">
             <div class="apr-card" style="background:rgba(56,189,248,0.1); color:#38bdf8;"><span class="title">Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
@@ -148,11 +153,11 @@
 </div>
 
 <script>
-    let usdToIdr = 16250; 
+    let usdToIdr = parseFloat(localStorage.getItem('last_usd_rate')) || 16250; 
     let prices = { btc: 0, eth: 0 };
     let changes = { btc: 0, eth: 0 }; 
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
-    let lastSource = 'usd'; // Default awal
+    let lastSource = 'usd'; 
     let lastRawValue = "0";
 
     function switchTab(target, btn) {
@@ -172,8 +177,8 @@
         if (!el) return;
         
         let raw = el.value.replace(/,/g, '');
-        lastSource = source; // Ingetin kolom mana yang diisi
-        lastRawValue = raw; // Ingetin angka mentahnya
+        lastSource = source; 
+        lastRawValue = raw; 
 
         if (!raw || raw === "0") {
             document.querySelectorAll('#page-kurs input').forEach(i => { if(i.id !== source) i.value = ""; });
@@ -183,13 +188,11 @@
         let val = parseFloat(raw) || 0;
         let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
 
-        // Update 4 koin utama
         if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
         if (source !== 'usd') document.getElementById('usd').value = formatOutput(baseUsd, 4);
         if (source !== 'btc') document.getElementById('btc').value = formatOutput(baseUsd / (prices.btc || 1), 8);
         if (source !== 'eth') document.getElementById('eth').value = formatOutput(baseUsd / (prices.eth || 1), 8);
         
-        // Update watchlist koin tambahan
         watchlist.forEach(s => {
             if (s !== source) {
                 let target = document.getElementById(s);
@@ -197,11 +200,29 @@
             }
         });
 
-        // Format tampilan kolom yang lagi diketik
         if (!el.value.includes('.')) {
             let dec = (source === 'idr' ? 0 : (source === 'usd' ? 4 : 8));
             el.value = formatOutput(val, dec);
         }
+    }
+
+    async function fetchUsdRate() {
+        try {
+            // Kita pake endpoint USDT_IDR dari exchanger lokal/global via Bybit atau sejenisnya
+            // Di sini gua pake BTCUSDT dan BTCIDR buat dapet cross-rate yang akurat
+            const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=USDCIDR`);
+            const d = await r.json();
+            if (d.result?.list?.[0]) {
+                let newRate = parseFloat(d.result.list[0].lastPrice);
+                if (newRate > 10000) { // Validasi sederhana
+                    usdToIdr = newRate;
+                    localStorage.setItem('last_usd_rate', usdToIdr);
+                }
+            }
+        } catch (e) {
+            console.log("Gagal ambil kurs USD, pake rate terakhir.");
+        }
+        document.getElementById('rate-info').innerText = "Rate: Rp " + new Intl.NumberFormat('id-ID').format(usdToIdr);
     }
 
     async function fetchPriceData(s) {
@@ -221,7 +242,8 @@
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
         
-        // Fetch BTC & ETH
+        await fetchUsdRate(); // Ambil kurs USD terbaru
+
         const b1 = await fetchPriceData('BTC');
         prices.btc = b1.price; changes.btc = b1.change;
         updatePriceUI('btc', b1.change);
@@ -230,19 +252,18 @@
         prices.eth = e1.price; changes.eth = e1.change;
         updatePriceUI('eth', e1.change);
 
-        // Fetch Watchlist
         for (let s of watchlist) {
             const res = await fetchPriceData(s);
             prices[s] = res.price; changes[s] = res.change;
         }
 
-        // Render ulang watchlist koin tambahan
         renderWatchlist();
         
-        // RE-CALCULATE: Ini kunci biar angka ga balik nol!
         if (lastRawValue !== "0" && lastRawValue !== "") {
             calculateKurs(lastSource);
         }
+
+        hitungAPR(); // Update angka di tab APR kalo rate berubah
 
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
@@ -305,7 +326,6 @@
         return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${sym}.png`;
     }
 
-    // APR Logic Tetap Sama
     let curAPR = 'IDR';
     function setCurrencyAPR(t) { 
         curAPR = t; 
