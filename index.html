@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="CalcPro">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
     <meta name="theme-color" content="#0f172a">
-    <title>CalcKurs Pro Fix</title>
+    <title>CalcKurs Pro Bybit Edition</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -25,6 +25,7 @@
         
         .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 20px 100px 20px; }
 
+        /* TAB NAVIGATION */
         .tab-bar {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 400px; background: var(--card);
@@ -33,21 +34,25 @@
         }
         .tab-btn {
             background: transparent; border: none; color: var(--subtext);
-            font-weight: bold; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
         .tab-btn.active { color: var(--accent); }
 
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.2s ease; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* KURS STYLES */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 0; }
         h2 { margin: 0; font-size: 22px; color: var(--accent); }
         .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
         
         .coin-card { 
             background: var(--card); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; 
-            display: flex; align-items: center; gap: 12px; border: 1px solid #334155; position: relative;
+            display: flex; align-items: center; gap: 12px; border: 1px solid #334155; 
+            position: relative;
         }
         .coin-info { flex: 1; }
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
@@ -63,8 +68,8 @@
         .input-wrapper { display: flex; align-items: center; gap: 8px; }
         input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; padding: 0; }
         
-        .copy-btn-kurs { color: var(--subtext); font-size: 16px; cursor: pointer; opacity: 0.5; }
-        .copy-btn-kurs:active { transform: scale(0.8); }
+        .copy-btn-kurs { color: var(--subtext); font-size: 16px; cursor: pointer; padding: 5px; opacity: 0.5; }
+        .copy-btn-kurs:active { transform: scale(0.8); opacity: 1; color: var(--accent); }
 
         .search-section { margin-top: 30px; border-top: 1px dashed #334155; padding-top: 20px; }
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
@@ -75,14 +80,19 @@
 
         /* APR STYLES */
         .currency-switch { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
-        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
+        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); transition: 0.3s; }
         .currency-switch button.active { background: var(--accent); color: #0f172a; }
         .apr-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--subtext); }
         .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
         .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
+        .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; font-weight: 500; }
         .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .hari { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+        .minggu { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
+        .bulan { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+        .tahun { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
-        .title { font-size: 11px; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
+        .title { font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8; }
         
         #toast {
             visibility: hidden; min-width: 150px; background-color: var(--accent); color: #0f172a;
@@ -154,7 +164,6 @@
             </div>
         </div>
         <div id="watchlist"></div>
-        
         <div class="search-section">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Tambah: sui, deep, sol...">
@@ -176,12 +185,11 @@
         <div id="cek-saldo-apr" class="terbilang"></div>
         <label class="apr-label">BUNGA PER TAHUN (%)</label>
         <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
-        
         <div style="margin-top: 25px;">
-            <div class="apr-card" style="background:rgba(56,189,248,0.1); color:#38bdf8;"><span class="title">Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" style="font-size:12px; color:#94a3b8;"></span></div>
-            <div class="apr-card" style="background:rgba(167,139,250,0.1); color:#a78bfa;"><span class="title">Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" style="font-size:12px; color:#94a3b8;"></span></div>
-            <div class="apr-card" style="background:rgba(74,222,128,0.1); color:#4ade80;"><span class="title">Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" style="font-size:12px; color:#94a3b8;"></span></div>
-            <div class="apr-card" style="background:rgba(251,191,36,0.1); color:#fbbf24;"><span class="title">Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" style="font-size:12px; color:#94a3b8;"></span></div>
+            <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
+            <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
+            <div class="apr-card bulan"><span class="title">Estimasi Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
+            <div class="apr-card tahun"><span class="title">Estimasi Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
         </div>
     </div>
 </div>
@@ -192,13 +200,6 @@
 </div>
 
 <script>
-    // Inisialisasi Data Global
-    let usdToIdr = 16250; 
-    let prices = { btc: 0, eth: 0 };
-    let changes = { btc: 0, eth: 0 };
-    let watchlist = JSON.parse(localStorage.getItem('kurs_v4_list')) || [];
-
-    // Fungsi Ganti Tab
     function switchTab(target, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -206,33 +207,35 @@
         btn.classList.add('active');
     }
 
-    // Format Angka
+    let usdToIdr = 16250; 
+    let prices = { btc: 0, eth: 0 };
+    let changes = { btc: 0, eth: 0 };
+    let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v4')) || [];
+
     function formatOutput(num, dec) {
-        if (!num || num === 0) return "";
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
+        if (num === 0) return "";
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
     }
 
-    // Fungsi Copy
     function copyValKurs(id) {
         let val = document.getElementById(id).value.replace(/,/g, '');
         if (!val || val == "0") return;
         navigator.clipboard.writeText(val).then(() => {
-            let t = document.getElementById("toast");
-            t.className = "show";
-            setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
+            let toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
         });
     }
 
-    // Hitung Kurs
     function calculateKurs(source) {
         let el = document.getElementById(source);
-        let raw = el.value.replace(/,/g, '');
-        if (raw === "" || raw === ".") {
-            const inputs = document.querySelectorAll('#page-kurs input[inputmode="decimal"]');
-            inputs.forEach(i => { if(i.id !== source) i.value = ""; });
+        let rawValue = el.value.replace(/,/g, '');
+        if (rawValue === "" || rawValue === "." || rawValue === "0" || rawValue === "0.") {
+            const allInputs = document.querySelectorAll('#page-kurs input[inputmode="decimal"]');
+            allInputs.forEach(input => { if(input.id !== source) input.value = ""; });
             return;
         }
-        let val = parseFloat(raw) || 0;
+        let val = parseFloat(rawValue) || 0;
         let baseUsd = (source === 'idr') ? val / usdToIdr : (source === 'usd' ? val : val * (prices[source] || 0));
 
         if (source !== 'idr') document.getElementById('idr').value = formatOutput(baseUsd * usdToIdr, 0);
@@ -246,25 +249,58 @@
                 if (target) target.value = formatOutput(baseUsd / (prices[s] || 1), 6);
             }
         });
+        if (!el.value.includes('.')) {
+            let d = (source === 'idr') ? 0 : (source === 'usd' ? 4 : 8);
+            el.value = formatOutput(val, d);
+        }
     }
 
-    // Fetch Data Bybit
-    async function fetchData(s) {
+    // --- BYBIT API LOGIC ---
+    async function fetchDataBybit(s) {
         try {
             const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT`);
-            const d = await r.json();
-            if (d.result && d.result.list && d.result.list.length > 0) {
-                const t = d.result.list[0];
-                const last = parseFloat(t.lastPrice);
-                const prev = parseFloat(t.prevPrice24h);
-                const chg = ((last - prev) / prev) * 100;
-                return { price: last, change: chg };
+            const data = await r.json();
+            if (data.result && data.result.list && data.result.list.length > 0) {
+                const ticker = data.result.list[0];
+                const lastPrice = parseFloat(ticker.lastPrice);
+                const prevPrice = parseFloat(ticker.prevPrice24h);
+                const percentChange = ((lastPrice - prevPrice) / prevPrice) * 100;
+                return { price: lastPrice, change: percentChange };
             }
-        } catch (e) { console.error(e); }
-        return { price: 0, change: 0 };
+            return { price: 0, change: 0 };
+        } catch (e) {
+            return { price: 0, change: 0 };
+        }
     }
 
-    // UI Change
+    async function fetchAllPrices() {
+        document.getElementById('status').innerText = "Updating Bybit...";
+        
+        // Update BTC
+        const btcData = await fetchDataBybit('BTC');
+        prices.btc = btcData.price;
+        changes.btc = btcData.change;
+        updateChangeUI('btc', changes.btc);
+
+        // Update ETH
+        const ethData = await fetchDataBybit('ETH');
+        prices.eth = ethData.price;
+        changes.eth = ethData.change;
+        updateChangeUI('eth', changes.eth);
+
+        // Update Watchlist
+        for (let s of watchlist) {
+            const coinData = await fetchDataBybit(s);
+            if (coinData.price > 0) {
+                prices[s] = coinData.price;
+                changes[s] = coinData.change;
+            }
+        }
+        
+        renderWatchlist();
+        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
+    }
+
     function updateChangeUI(id, val) {
         const el = document.getElementById(`change-${id}`);
         if (!el) return;
@@ -273,18 +309,54 @@
         el.className = `price-change ${val >= 0 ? 'plus' : 'minus'}`;
     }
 
-    // Render Watchlist
+    function getLogo(sym) {
+        const s = sym.toLowerCase();
+        if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
+        if (s === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
+        if (s === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`;
+    }
+
+    async function addCoin() {
+        let s = document.getElementById('search-input').value.toUpperCase().trim();
+        if (!s || watchlist.includes(s)) return;
+        let data = await fetchDataBybit(s);
+        if (data.price > 0) {
+            watchlist.push(s); 
+            prices[s] = data.price;
+            changes[s] = data.change;
+            localStorage.setItem('kurs_fast_v4', JSON.stringify(watchlist));
+            renderWatchlist();
+            document.getElementById('search-input').value = "";
+        } else {
+            alert("Koin gak ketemu di Bybit, Bro!");
+        }
+    }
+
+    function removeCoin(s) {
+        watchlist = watchlist.filter(i => i !== s);
+        localStorage.setItem('kurs_fast_v4', JSON.stringify(watchlist));
+        renderWatchlist();
+    }
+
     function renderWatchlist() {
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
         watchlist.forEach(s => {
             const chg = changes[s] || 0;
             const sign = chg >= 0 ? "+" : "";
+            const colorClass = chg >= 0 ? "plus" : "minus";
+            
             container.innerHTML += `
                 <div class="coin-card">
-                    <div class="logo-wrapper"><img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s.toLowerCase()}.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div>
+                    <div class="logo-wrapper">
+                        <img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'">
+                    </div>
                     <div class="coin-info">
-                        <div class="label-row"><label>${s}</label><span class="price-change ${chg >= 0 ? 'plus' : 'minus'}">${sign}${chg.toFixed(2)}%</span></div>
+                        <div class="label-row">
+                            <label>${s}</label>
+                            <span class="price-change ${colorClass}">${sign}${chg.toFixed(2)}%</span>
+                        </div>
                         <div class="input-wrapper">
                             <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
                             <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
@@ -295,69 +367,17 @@
         });
     }
 
-    // Update Semua Harga
-    async function fetchAllPrices() {
-        document.getElementById('status').innerText = "Updating...";
-        
-        // BTC & ETH
-        const b = await fetchData('BTC'); prices.btc = b.price; changes.btc = b.change; updateChangeUI('btc', b.change);
-        const e = await fetchData('ETH'); prices.eth = e.price; changes.eth = e.change; updateChangeUI('eth', e.change);
-
-        // Watchlist
-        for (let s of watchlist) {
-            const d = await fetchData(s);
-            if (d.price > 0) { prices[s] = d.price; changes[s] = d.change; }
-        }
-        
-        renderWatchlist();
-        document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
-    }
-
-    // Tambah Koin
-    async function addCoin() {
-        let s = document.getElementById('search-input').value.toUpperCase().trim();
-        if (!s || watchlist.includes(s)) return;
-        let d = await fetchData(s);
-        if (d.price > 0) {
-            watchlist.push(s); prices[s] = d.price; changes[s] = d.change;
-            localStorage.setItem('kurs_v4_list', JSON.stringify(watchlist));
-            renderWatchlist();
-            document.getElementById('search-input').value = "";
-        }
-    }
-
-    function removeCoin(s) {
-        watchlist = watchlist.filter(i => i !== s);
-        localStorage.setItem('kurs_v4_list', JSON.stringify(watchlist));
-        renderWatchlist();
-    }
-
-    // Logika APR
-    let currAPR = 'IDR';
-    function setCurrencyAPR(t) {
-        currAPR = t;
-        document.getElementById('btn-idr-apr').classList.toggle('active', t === 'IDR');
-        document.getElementById('btn-usd-apr').classList.toggle('active', t === 'USD');
-        document.getElementById('label-saldo-apr').innerText = `JUMLAH SALDO (${t === 'IDR' ? 'Rp' : '$'})`;
+    // --- LOGIKA APR (TETAP) ---
+    let currentCurrencyAPR = 'IDR';
+    function setCurrencyAPR(type) {
+        currentCurrencyAPR = type;
+        document.getElementById('btn-idr-apr').classList.toggle('active', type === 'IDR');
+        document.getElementById('btn-usd-apr').classList.toggle('active', type === 'USD');
+        document.getElementById('label-saldo-apr').innerText = `JUMLAH SALDO (${type === 'IDR' ? 'Rp' : '$'})`;
         hitungAPR();
     }
 
     function hitungAPR() {
-        let s = parseFloat(document.getElementById('saldo-apr').value.replace(/,/g, '')) || 0;
-        let b = parseFloat(document.getElementById('bunga-apr').value.replace(/,/g, '')) || 0;
-        const thn = s * (b / 100);
-        const p = {'tahunan': thn, 'bulanan': thn/12, 'mingguan': thn/52, 'harian': thn/365};
-        
-        document.getElementById('cek-saldo-apr').innerText = (currAPR === 'USD') ? "Rp " + formatOutput(s * usdToIdr, 0) : "Rp " + formatOutput(s, 0);
-        
-        for (let k in p) {
-            let v = p[k];
-            document.getElementById(`${k}-apr`).innerText = (currAPR === 'IDR') ? "Rp " + formatOutput(v, 0) : "$ " + v.toFixed(2);
-            document.getElementById(`${k}-idr`).innerText = (currAPR === 'USD' && v > 0) ? "≈ Rp " + formatOutput(v * usdToIdr, 0) : "";
-        }
-    }
-
-    window.onload = fetchAllPrices;
-</script>
-</body>
-</html>
+        let elSaldo = document.getElementById('saldo-apr');
+        let elBunga = document.getElementById('bunga-apr');
+        let rawSaldo = elSa
