@@ -21,7 +21,8 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
         
-        .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 20px 100px 20px; }
+        /* Kasih padding kanan 40px biar si silang di luar kotak nggak kepotong layar */
+        .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 40px 100px 20px; }
 
         /* TAB NAVIGATION */
         .tab-bar {
@@ -47,10 +48,13 @@
         h2 { margin: 0; font-size: 22px; color: var(--accent); }
         .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
         
+        /* Pembungkus biar silang bisa di luar kotak */
+        .coin-row { position: relative; width: 100%; margin-bottom: 12px; }
+
         .coin-card { 
-            background: var(--card); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; 
+            background: var(--card); border-radius: 16px; padding: 14px 18px; 
             display: flex; align-items: center; gap: 12px; border: 1px solid #334155; 
-            position: relative;
+            width: 100%; /* Kotak tetep full lebar container */
         }
         .coin-info { flex: 1; }
         .coin-info label { display: block; font-size: 11px; color: var(--subtext); font-weight: bold; margin-bottom: 2px; }
@@ -66,11 +70,22 @@
         }
         .copy-btn-kurs:active { transform: scale(0.8); opacity: 1; color: var(--accent); }
 
+        /* TOMBOL HAPUS DI LUAR KOTAK SEBELAH KANAN */
+        .delete-btn-outside { 
+            position: absolute; 
+            right: -32px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            color: #ef4444; 
+            font-size: 28px; 
+            cursor: pointer; 
+            padding: 5px; 
+        }
+
         .search-section { margin-top: 30px; border-top: 1px dashed #334155; padding-top: 20px; }
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
         .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
         .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
-        .delete-btn { color: #ef4444; font-size: 24px; cursor: pointer; padding-left: 5px; }
         .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
 
         /* APR STYLES */
@@ -89,7 +104,6 @@
         .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
         .title { font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8; }
         
-        /* Toast Notification */
         #toast {
             visibility: hidden; min-width: 150px; background-color: var(--accent); color: #0f172a;
             text-align: center; border-radius: 10px; padding: 10px; position: fixed;
@@ -112,7 +126,7 @@
         </div>
 
         <div id="fixed-list">
-            <div class="coin-card" style="border-left: 5px solid #ef4444;">
+            <div class="coin-card" style="border-left: 5px solid #ef4444; margin-bottom:12px;">
                 <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
                 <div class="coin-info">
                     <label>IDR (Rupiah)</label>
@@ -122,7 +136,7 @@
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #3b82f6;">
+            <div class="coin-card" style="border-left: 5px solid #3b82f6; margin-bottom:12px;">
                 <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-united-states.svg"></div>
                 <div class="coin-info">
                     <label>USD (Dollar)</label>
@@ -132,7 +146,7 @@
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #f7931a;">
+            <div class="coin-card" style="border-left: 5px solid #f7931a; margin-bottom:12px;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
                 <div class="coin-info">
                     <label>BTC (Bitcoin)</label>
@@ -142,7 +156,7 @@
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #627eea;">
+            <div class="coin-card" style="border-left: 5px solid #627eea; margin-bottom:12px;">
                 <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
                 <div class="coin-info">
                     <label>ETH (Ethereum)</label>
@@ -153,7 +167,9 @@
                 </div>
             </div>
         </div>
+        
         <div id="watchlist"></div>
+        
         <div class="search-section">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Tambah: sui, deep, sol...">
@@ -164,27 +180,17 @@
     </div>
 
     <div id="page-apr" class="page">
-        <div class="header">
-            <h2>💰 Calc APR</h2>
-        </div>
-        
+        <div class="header"><h2>💰 Calc APR</h2></div>
         <label class="apr-label">MATA UANG</label>
         <div class="currency-switch">
             <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
             <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
-        
         <label id="label-saldo-apr" class="apr-label">JUMLAH SALDO (Rp)</label>
-        <div class="apr-input-box">
-            <input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
+        <div class="apr-input-box"><input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div id="cek-saldo-apr" class="terbilang"></div>
-        
         <label class="apr-label">BUNGA PER TAHUN (%)</label>
-        <div class="apr-input-box">
-            <input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
-        </div>
-
+        <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
         <div style="margin-top: 25px;">
             <div class="apr-card hari"><span class="title">Estimasi Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
             <div class="apr-card minggu"><span class="title">Estimasi Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
@@ -216,7 +222,6 @@
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec, minimumIntegerDigits: 1 }).format(num);
     }
 
-    // Fungsi Copy Kurs
     function copyValKurs(id) {
         let val = document.getElementById(id).value.replace(/,/g, '');
         if (!val || val == "0") return;
@@ -227,7 +232,6 @@
         });
     }
 
-    // --- LOGIKA KURS ---
     function calculateKurs(source) {
         let el = document.getElementById(source);
         let rawValue = el.value.replace(/,/g, '');
@@ -255,7 +259,6 @@
         }
     }
 
-    // --- LOGIKA APR ---
     let currentCurrencyAPR = 'IDR';
     function setCurrencyAPR(type) {
         currentCurrencyAPR = type;
@@ -289,7 +292,6 @@
         }
     }
 
-    // --- FETCH & RENDER ---
     function getLogo(sym) {
         const s = sym.toLowerCase();
         if (s === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
@@ -337,7 +339,22 @@
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
         watchlist.forEach(s => {
-            container.innerHTML += `<div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><label>${s}</label><div class="input-wrapper"><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"><span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span></div></div><div class="delete-btn" onclick="removeCoin('${s}')">×</div></div>`;
+            container.innerHTML += `
+                <div class="coin-row">
+                    <div class="coin-card">
+                        <div class="logo-wrapper">
+                            <img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'">
+                        </div>
+                        <div class="coin-info">
+                            <label>${s}</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
+                                <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="delete-btn-outside" onclick="removeCoin('${s}')">×</div>
+                </div>`;
         });
     }
 
