@@ -22,21 +22,28 @@
         }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 40px 100px 20px; }
+        .container { width: 100%; max-width: 400px; padding: env(safe-area-inset-top) 20px 100px 20px; }
+        
+        /* Navigation */
         .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: var(--card); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #334155; z-index: 100; }
         .tab-btn { background: transparent; border: none; color: var(--subtext); font-weight: bold; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .tab-btn.active { color: var(--accent); }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Common Components */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 0; }
         h2 { margin: 0; font-size: 22px; color: var(--accent); }
         .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Page Kurs Style */
         .coin-row { position: relative; width: 100%; margin-bottom: 12px; }
         .coin-card { background: var(--card); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; width: 100%; }
         .coin-info { flex: 1; overflow: hidden; }
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-        .label-row label { font-size: 11px; color: var(--subtext); font-weight: bold; text-transform: uppercase; }
+        .label-row label { font-size: 11px; color: var(--subtext); font-weight: bold; text-transform: uppercase; margin-bottom: 0; }
         .price-change { font-size: 12px; font-weight: 800; min-width: 65px; text-align: right; }
         .up { color: var(--up); }
         .down { color: var(--down); }
@@ -44,26 +51,32 @@
         .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .input-wrapper { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
         input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; padding: 0; }
-        .delete-btn-outside { position: absolute; right: -32px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 28px; cursor: pointer; padding: 5px; }
+        .delete-btn-outside { position: absolute; right: -30px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 28px; cursor: pointer; padding: 5px; }
+
+        /* Page APR Style (New) */
+        .kurs-info-badge { font-size: 11px; color: var(--subtext); background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px; border: 1px solid #334155; }
+        .currency-switch { display: flex; gap: 8px; margin-bottom: 25px; background: var(--card); padding: 4px; border-radius: 12px; }
+        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 9px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); transition: 0.2s; }
+        .currency-switch button.active { background: var(--accent); color: #0f172a; }
+        .input-box-apr { width: 100%; padding: 16px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 16px; background: var(--card); }
+        .input-box-apr:focus-within { border-color: var(--accent); }
+        .input-box-apr input { font-size: 22px; }
+        .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 25px; font-weight: 500; min-height: 18px; }
+        .result-grid { display: grid; gap: 12px; }
+        .apr-card { padding: 18px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .apr-card .val { font-size: 22px; font-weight: 800; display: block; margin-top: 4px; }
+        .apr-card .title { font-size: 10px; text-transform: uppercase; font-weight: bold; opacity: 0.7; letter-spacing: 1px; }
+        .apr-card .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 4px; font-weight: 500; }
+        .harian { background: rgba(56, 189, 248, 0.08); color: #38bdf8; }
+        .mingguan { background: rgba(167, 139, 250, 0.08); color: #a78bfa; }
+        .bulanan { background: rgba(74, 222, 128, 0.08); color: #4ade80; }
+        .tahunan { background: rgba(251, 191, 36, 0.08); color: #fbbf24; }
+
         .search-section { margin-top: 30px; border-top: 1px dashed #334155; padding-top: 20px; }
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
         .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
         .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
         .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
-        
-        /* APR Style */
-        .currency-switch { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 5px; border-radius: 12px; }
-        .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
-        .currency-switch button.active { background: var(--accent); color: #0f172a; }
-        .apr-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .apr-label { display: block; font-weight: 600; font-size: 14px; color: var(--subtext); }
-        .apr-input-box { width: 100%; padding: 14px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 12px; background: #0f172a; }
-        .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 20px; font-weight: 500; min-height: 15px; }
-        .apr-card { padding: 18px; border-radius: 16px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .val { font-size: 24px; font-weight: 800; display: block; margin-top: 4px; }
-        .title { font-size: 11px; text-transform: uppercase; font-weight: bold; opacity: 0.8; }
-        .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 2px; }
-        #rate-info { font-size: 11px; color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -124,32 +137,40 @@
     </div>
 
     <div id="page-apr" class="page">
-        <div class="header"><h2>💰 Calc APR</h2></div>
-        <div class="apr-header-row">
-            <label class="apr-label">MATA UANG</label>
-            <span id="rate-info">Rate: Loading...</span>
+        <div class="header">
+            <h2>💰 APR Pro</h2>
+            <div id="kurs-live-badge" class="kurs-info-badge">USD/IDR: Loading...</div>
         </div>
+
+        <label>Mata Uang</label>
         <div class="currency-switch">
             <button id="btn-idr-apr" class="active" onclick="setCurrencyAPR('IDR')">IDR (Rp)</button>
             <button id="btn-usd-apr" onclick="setCurrencyAPR('USD')">USD ($)</button>
         </div>
-        <label id="label-saldo-apr" class="apr-label" style="margin-bottom:8px;">JUMLAH SALDO</label>
-        <div class="apr-input-box"><input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
+
+        <label id="label-saldo-apr">Jumlah Saldo</label>
+        <div class="input-box-apr">
+            <input type="text" id="saldo-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
+        </div>
         <div id="cek-saldo-apr" class="terbilang"></div>
-        <label class="apr-label" style="margin-bottom:8px;">BUNGA PER TAHUN (%)</label>
-        <div class="apr-input-box"><input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()"></div>
-        <div style="margin-top: 25px;">
-            <div class="apr-card" style="background:rgba(56,189,248,0.1); color:#38bdf8;"><span class="title">Harian</span><span id="harian-apr" class="val">0</span><span id="harian-idr" class="sub-val"></span></div>
-            <div class="apr-card" style="background:rgba(167,139,250,0.1); color:#a78bfa;"><span class="title">Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-idr" class="sub-val"></span></div>
-            <div class="apr-card" style="background:rgba(74,222,128,0.1); color:#4ade80;"><span class="title">Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-idr" class="sub-val"></span></div>
-            <div class="apr-card" style="background:rgba(251,191,36,0.1); color:#fbbf24;"><span class="title">Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-idr" class="sub-val"></span></div>
+
+        <label>Bunga Per Tahun (%)</label>
+        <div class="input-box-apr">
+            <input type="text" id="bunga-apr" inputmode="decimal" placeholder="0" oninput="hitungAPR()">
+        </div>
+
+        <div class="result-grid">
+            <div class="apr-card harian"><span class="title">Harian</span><span id="harian-apr" class="val">0</span><span id="harian-sub" class="sub-val"></span></div>
+            <div class="apr-card mingguan"><span class="title">Mingguan</span><span id="mingguan-apr" class="val">0</span><span id="mingguan-sub" class="sub-val"></span></div>
+            <div class="apr-card bulanan"><span class="title">Bulanan</span><span id="bulanan-apr" class="val">0</span><span id="bulanan-sub" class="sub-val"></span></div>
+            <div class="apr-card tahunan"><span class="title">Tahunan</span><span id="tahunan-apr" class="val">0</span><span id="tahunan-sub" class="sub-val"></span></div>
         </div>
     </div>
 </div>
 
 <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('kurs', this)"><span>💱</span><span>Kurs</span></button>
-    <button class="tab-btn" onclick="switchTab('apr', this)"><span>💰</span><span>APR</span></button>
+    <button id="tab-kurs-btn" class="tab-btn active" onclick="switchTab('kurs', this)"><span>💱</span><span>Kurs</span></button>
+    <button id="tab-apr-btn" class="tab-btn" onclick="switchTab('apr', this)"><span>💰</span><span>APR</span></button>
 </div>
 
 <script>
@@ -159,7 +180,9 @@
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
     let lastSource = 'usd'; 
     let lastRawValue = "0";
+    let currentCurrencyAPR = localStorage.getItem('apr_currency') || 'IDR';
 
+    // NAVIGATION
     function switchTab(target, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -167,15 +190,19 @@
         btn.classList.add('active');
     }
 
+    // FORMATTING
     function formatOutput(num, dec) {
         if (num === 0) return "";
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
     }
+    function formatIDR(num) {
+        return "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(num));
+    }
 
+    // KURS LOGIC
     function calculateKurs(source) {
         let el = document.getElementById(source);
         if (!el) return;
-        
         let raw = el.value.replace(/,/g, '');
         lastSource = source; 
         lastRawValue = raw; 
@@ -204,25 +231,30 @@
             let dec = (source === 'idr' ? 0 : (source === 'usd' ? 4 : 8));
             el.value = formatOutput(val, dec);
         }
+        // Update APR if needed
+        hitungAPR();
     }
 
+    // API CALLS (Bybit Cross-Rate)
     async function fetchUsdRate() {
         try {
-            // Kita pake endpoint USDT_IDR dari exchanger lokal/global via Bybit atau sejenisnya
-            // Di sini gua pake BTCUSDT dan BTCIDR buat dapet cross-rate yang akurat
-            const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=USDCIDR`);
-            const d = await r.json();
-            if (d.result?.list?.[0]) {
-                let newRate = parseFloat(d.result.list[0].lastPrice);
-                if (newRate > 10000) { // Validasi sederhana
-                    usdToIdr = newRate;
+            const [rIdr, rUsdt] = await Promise.all([
+                fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCIDR`),
+                fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT`)
+            ]);
+            const dIdr = await rIdr.json();
+            const dUsdt = await rUsdt.json();
+
+            if (dIdr.result?.list?.[0] && dUsdt.result?.list?.[0]) {
+                const btcIdr = parseFloat(dIdr.result.list[0].lastPrice);
+                const btcUsdt = parseFloat(dUsdt.result.list[0].lastPrice);
+                if (btcIdr > 0 && btcUsdt > 0) {
+                    usdToIdr = btcIdr / btcUsdt;
                     localStorage.setItem('last_usd_rate', usdToIdr);
                 }
             }
-        } catch (e) {
-            console.log("Gagal ambil kurs USD, pake rate terakhir.");
-        }
-        document.getElementById('rate-info').innerText = "Rate: Rp " + new Intl.NumberFormat('id-ID').format(usdToIdr);
+        } catch (e) { console.log("Gagal ambil kurs"); }
+        document.getElementById('kurs-live-badge').innerText = `USD/IDR: ${new Intl.NumberFormat('id-ID').format(Math.round(usdToIdr))}`;
     }
 
     async function fetchPriceData(s) {
@@ -241,30 +273,20 @@
 
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
-        
-        await fetchUsdRate(); // Ambil kurs USD terbaru
-
+        await fetchUsdRate();
         const b1 = await fetchPriceData('BTC');
         prices.btc = b1.price; changes.btc = b1.change;
         updatePriceUI('btc', b1.change);
-
         const e1 = await fetchPriceData('ETH');
         prices.eth = e1.price; changes.eth = e1.change;
         updatePriceUI('eth', e1.change);
-
         for (let s of watchlist) {
             const res = await fetchPriceData(s);
             prices[s] = res.price; changes[s] = res.change;
         }
-
         renderWatchlist();
-        
-        if (lastRawValue !== "0" && lastRawValue !== "") {
-            calculateKurs(lastSource);
-        }
-
-        hitungAPR(); // Update angka di tab APR kalo rate berubah
-
+        if (lastRawValue !== "0" && lastRawValue !== "") calculateKurs(lastSource);
+        hitungAPR();
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
 
@@ -275,6 +297,7 @@
         el.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
     }
 
+    // WATCHLIST LOGIC
     async function addCoin() {
         let s = document.getElementById('search-input').value.toUpperCase().trim();
         if (!s || watchlist.includes(s)) return;
@@ -301,56 +324,70 @@
         container.innerHTML = "";
         watchlist.forEach(s => {
             const chg = changes[s] || 0;
-            container.innerHTML += `
-                <div class="coin-row">
-                    <div class="coin-card">
-                        <div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div>
-                        <div class="coin-info">
-                            <div class="label-row"><label>${s}</label></div>
-                            <div class="input-wrapper">
-                                <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
-                                <span class="price-change ${chg >= 0 ? 'up' : 'down'}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="delete-btn-outside" onclick="removeCoin('${s}')">×</div>
-                </div>`;
+            container.innerHTML += `<div class="coin-row"><div class="coin-card"><div class="logo-wrapper"><img src="${getLogo(s)}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div><div class="coin-info"><div class="label-row"><label>${s}</label></div><div class="input-wrapper"><input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')"><span class="price-change ${chg >= 0 ? 'up' : 'down'}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span></div></div></div><div class="delete-btn-outside" onclick="removeCoin('${s}')">×</div></div>`;
         });
     }
 
     function getLogo(s) {
         const sym = s.toLowerCase();
-        if (sym === 'deep') return 'https://assets.coingecko.com/coins/images/40049/large/deep.png';
-        if (sym === 'sui') return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png';
-        if (sym === 'sol') return 'https://assets.coingecko.com/coins/images/4128/large/solana.png';
+        const icons = { 'deep': '40049', 'sui': '26375', 'sol': '4128' };
+        if (icons[sym]) return `https://assets.coingecko.com/coins/images/${icons[sym]}/large/${sym}.png`;
         return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${sym}.png`;
     }
 
-    let curAPR = 'IDR';
-    function setCurrencyAPR(t) { 
-        curAPR = t; 
-        document.getElementById('btn-idr-apr').className = t==='IDR'?'active':''; 
-        document.getElementById('btn-usd-apr').className = t==='USD'?'active':''; 
-        hitungAPR(); 
+    // APR LOGIC (PRO VERSION)
+    function setCurrencyAPR(type) {
+        currentCurrencyAPR = type;
+        localStorage.setItem('apr_currency', type);
+        document.getElementById('btn-idr-apr').className = type === 'IDR' ? 'active' : '';
+        document.getElementById('btn-usd-apr').className = type === 'USD' ? 'active' : '';
+        hitungAPR();
     }
+
     function hitungAPR() {
         let sInput = document.getElementById('saldo-apr');
         let bInput = document.getElementById('bunga-apr');
-        let s = parseFloat(sInput.value.replace(/,/g,'')) || 0;
-        let b = parseFloat(bInput.value.replace(/,/g,'')) || 0;
         
-        if (!sInput.value.includes('.')) sInput.value = formatOutput(s, 0);
-        
-        let thn = s * (b/100);
-        let p = { tahunan: thn, bulanan: thn/12, mingguan: thn/52, harian: thn/365 };
-        document.getElementById('cek-saldo-apr').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(curAPR==='USD'?s*usdToIdr:s));
-        for(let k in p) {
-            document.getElementById(k+'-apr').innerText = (curAPR==='IDR'?'Rp ':'$ ') + (curAPR==='IDR' ? new Intl.NumberFormat('id-ID').format(Math.floor(p[k])) : formatOutput(p[k], 2));
-            document.getElementById(k+'-idr').innerText = (curAPR==='USD' && p[k]>0) ? "≈ Rp " + new Intl.NumberFormat('id-ID').format(Math.floor(p[k]*usdToIdr)) : "";
+        // Load values for the first time
+        if(window.isInitialLoad) {
+            sInput.value = localStorage.getItem('apr_saldo') || "";
+            bInput.value = localStorage.getItem('apr_bunga') || "";
+            window.isInitialLoad = false;
+        }
+
+        localStorage.setItem('apr_saldo', sInput.value);
+        localStorage.setItem('apr_bunga', bInput.value);
+
+        let saldo = parseFloat(sInput.value.replace(/,/g, '')) || 0;
+        let bunga = parseFloat(bInput.value.replace(/,/g, '')) || 0;
+
+        if (sInput.value !== "" && !sInput.value.includes('.')) {
+            sInput.value = new Intl.NumberFormat('en-US').format(saldo);
+        }
+
+        let thn = saldo * (bunga / 100);
+        let p = { tahunan: thn, bulanan: thn / 12, mingguan: thn / 52, harian: thn / 365 };
+
+        let konversi = currentCurrencyAPR === 'USD' ? saldo * usdToIdr : saldo;
+        document.getElementById('cek-saldo-apr').innerText = saldo > 0 ? formatIDR(konversi) : "";
+
+        for (let k in p) {
+            let val = p[k];
+            if (currentCurrencyAPR === 'IDR') {
+                document.getElementById(k + '-apr').innerText = formatIDR(val);
+                document.getElementById(k + '-sub').innerText = "";
+            } else {
+                document.getElementById(k + '-apr').innerText = "$ " + new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(val);
+                document.getElementById(k + '-sub').innerText = val > 0 ? "≈ " + formatIDR(val * usdToIdr) : "";
+            }
         }
     }
 
-    window.onload = fetchAllPrices;
+    window.onload = () => {
+        window.isInitialLoad = true;
+        setCurrencyAPR(currentCurrencyAPR); // Ini bakal manggil hitungAPR
+        fetchAllPrices();
+    };
 </script>
 </body>
 </html>
