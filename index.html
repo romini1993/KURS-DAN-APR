@@ -45,9 +45,12 @@
         h2 { margin: 0; font-size: 22px; color: var(--accent); }
         .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
         
+        /* Container untuk Card + Tombol Delete diluar */
+        .card-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; width: 100%; }
+
         .coin-card { 
-            background: var(--card); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; 
-            display: flex; align-items: center; gap: 12px; border: 1px solid #334155; position: relative;
+            background: var(--card); border-radius: 16px; padding: 14px 18px; 
+            display: flex; align-items: center; gap: 12px; border: 1px solid #334155; position: relative; flex: 1;
         }
         .coin-info { flex: 1; }
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
@@ -70,7 +73,15 @@
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
         .search-box input { background: var(--card); border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; width: 100%; font-size: 14px; }
         .add-btn { background: var(--accent); border: none; color: #0f172a; border-radius: 10px; padding: 0 15px; font-weight: bold; cursor: pointer; }
-        .delete-btn { color: #ef4444; font-size: 24px; cursor: pointer; padding-left: 5px; }
+        
+        /* TOMBOL HAPUS DI LUAR */
+        .delete-btn-outer { 
+            color: #ef4444; font-size: 28px; cursor: pointer; 
+            padding: 5px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; opacity: 0.8;
+        }
+        .delete-btn-outer:active { transform: scale(1.2); opacity: 1; }
+
         .status-info { font-size: 11px; color: var(--subtext); text-align: center; margin-top: 10px; }
 
         /* APR STYLES */
@@ -101,58 +112,70 @@
 <div class="container">
     <div id="page-kurs" class="page active">
         <div class="header">
-            <h2>💱 Calc Kurs Fast</h2>
+            <h2>💱 Calc Kurs Pro</h2>
             <button class="refresh-btn" onclick="fetchAllPrices()">🔄 Update</button>
         </div>
 
         <div id="fixed-list">
-            <div class="coin-card" style="border-left: 5px solid #ef4444;">
-                <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
-                <div class="coin-info">
-                    <label>IDR (Rupiah)</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="idr" inputmode="decimal" placeholder="0" oninput="calculateKurs('idr')">
-                        <span class="copy-btn-kurs" onclick="copyValKurs('idr')">📋</span>
+            <div class="card-wrapper">
+                <div class="coin-card" style="border-left: 5px solid #ef4444;">
+                    <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-indonesia.svg"></div>
+                    <div class="coin-info">
+                        <label>IDR (Rupiah)</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="idr" inputmode="decimal" placeholder="0" oninput="calculateKurs('idr')">
+                            <span class="copy-btn-kurs" onclick="copyValKurs('idr')">📋</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #3b82f6;">
-                <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-united-states.svg"></div>
-                <div class="coin-info">
-                    <label>USD (Dollar)</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="usd" inputmode="decimal" placeholder="0" oninput="calculateKurs('usd')">
-                        <span class="copy-btn-kurs" onclick="copyValKurs('usd')">📋</span>
+
+            <div class="card-wrapper">
+                <div class="coin-card" style="border-left: 5px solid #3b82f6;">
+                    <div class="logo-wrapper"><img src="https://api.iconify.design/emojione:flag-for-united-states.svg"></div>
+                    <div class="coin-info">
+                        <label>USD (Dollar)</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="usd" inputmode="decimal" placeholder="0" oninput="calculateKurs('usd')">
+                            <span class="copy-btn-kurs" onclick="copyValKurs('usd')">📋</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #f7931a;">
-                <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
-                <div class="coin-info">
-                    <div class="label-row">
-                        <label>BTC (Bitcoin)</label>
-                        <span id="change-btc" class="price-change">--</span>
-                    </div>
-                    <div class="input-wrapper">
-                        <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
-                        <span class="copy-btn-kurs" onclick="copyValKurs('btc')">📋</span>
+
+            <div class="card-wrapper">
+                <div class="coin-card" style="border-left: 5px solid #f7931a;">
+                    <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"></div>
+                    <div class="coin-info">
+                        <div class="label-row">
+                            <label>BTC (Bitcoin)</label>
+                            <span id="change-btc" class="price-change">--</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" id="btc" inputmode="decimal" placeholder="0" oninput="calculateKurs('btc')">
+                            <span class="copy-btn-kurs" onclick="copyValKurs('btc')">📋</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="coin-card" style="border-left: 5px solid #627eea;">
-                <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
-                <div class="coin-info">
-                    <div class="label-row">
-                        <label>ETH (Ethereum)</label>
-                        <span id="change-eth" class="price-change">--</span>
-                    </div>
-                    <div class="input-wrapper">
-                        <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
-                        <span class="copy-btn-kurs" onclick="copyValKurs('eth')">📋</span>
+
+            <div class="card-wrapper">
+                <div class="coin-card" style="border-left: 5px solid #627eea;">
+                    <div class="logo-wrapper"><img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png"></div>
+                    <div class="coin-info">
+                        <div class="label-row">
+                            <label>ETH (Ethereum)</label>
+                            <span id="change-eth" class="price-change">--</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" id="eth" inputmode="decimal" placeholder="0" oninput="calculateKurs('eth')">
+                            <span class="copy-btn-kurs" onclick="copyValKurs('eth')">📋</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        
         <div id="watchlist"></div>
         
         <div class="search-section">
@@ -192,13 +215,11 @@
 </div>
 
 <script>
-    // Inisialisasi Data Global
     let usdToIdr = 16250; 
     let prices = { btc: 0, eth: 0 };
     let changes = { btc: 0, eth: 0 };
     let watchlist = JSON.parse(localStorage.getItem('kurs_v4_list')) || [];
 
-    // Fungsi Ganti Tab
     function switchTab(target, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -206,13 +227,11 @@
         btn.classList.add('active');
     }
 
-    // Format Angka
     function formatOutput(num, dec) {
         if (!num || num === 0) return "";
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
     }
 
-    // Fungsi Copy
     function copyValKurs(id) {
         let val = document.getElementById(id).value.replace(/,/g, '');
         if (!val || val == "0") return;
@@ -223,7 +242,6 @@
         });
     }
 
-    // Hitung Kurs
     function calculateKurs(source) {
         let el = document.getElementById(source);
         let raw = el.value.replace(/,/g, '');
@@ -248,7 +266,6 @@
         });
     }
 
-    // Fetch Data Bybit
     async function fetchData(s) {
         try {
             const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT`);
@@ -264,7 +281,6 @@
         return { price: 0, change: 0 };
     }
 
-    // UI Change
     function updateChangeUI(id, val) {
         const el = document.getElementById(`change-${id}`);
         if (!el) return;
@@ -273,7 +289,6 @@
         el.className = `price-change ${val >= 0 ? 'plus' : 'minus'}`;
     }
 
-    // Render Watchlist
     function renderWatchlist() {
         let container = document.getElementById('watchlist');
         container.innerHTML = "";
@@ -281,39 +296,39 @@
             const chg = changes[s] || 0;
             const sign = chg >= 0 ? "+" : "";
             container.innerHTML += `
-                <div class="coin-card">
-                    <div class="logo-wrapper"><img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s.toLowerCase()}.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'"></div>
-                    <div class="coin-info">
-                        <div class="label-row"><label>${s}</label><span class="price-change ${chg >= 0 ? 'plus' : 'minus'}">${sign}${chg.toFixed(2)}%</span></div>
-                        <div class="input-wrapper">
-                            <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
-                            <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
+                <div class="card-wrapper">
+                    <div class="coin-card">
+                        <div class="logo-wrapper">
+                            <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s.toLowerCase()}.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1041/1041888.png'">
+                        </div>
+                        <div class="coin-info">
+                            <div class="label-row">
+                                <label>${s}</label>
+                                <span class="price-change ${chg >= 0 ? 'plus' : 'minus'}">${sign}${chg.toFixed(2)}%</span>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="text" id="${s}" inputmode="decimal" placeholder="0" oninput="calculateKurs('${s}')">
+                                <span class="copy-btn-kurs" onclick="copyValKurs('${s}')">📋</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="delete-btn" onclick="removeCoin('${s}')">×</div>
+                    <div class="delete-btn-outer" onclick="removeCoin('${s}')">×</div>
                 </div>`;
         });
     }
 
-    // Update Semua Harga
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
-        
-        // BTC & ETH
         const b = await fetchData('BTC'); prices.btc = b.price; changes.btc = b.change; updateChangeUI('btc', b.change);
         const e = await fetchData('ETH'); prices.eth = e.price; changes.eth = e.change; updateChangeUI('eth', e.change);
-
-        // Watchlist
         for (let s of watchlist) {
             const d = await fetchData(s);
             if (d.price > 0) { prices[s] = d.price; changes[s] = d.change; }
         }
-        
         renderWatchlist();
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
 
-    // Tambah Koin
     async function addCoin() {
         let s = document.getElementById('search-input').value.toUpperCase().trim();
         if (!s || watchlist.includes(s)) return;
@@ -332,7 +347,6 @@
         renderWatchlist();
     }
 
-    // Logika APR
     let currAPR = 'IDR';
     function setCurrencyAPR(t) {
         currAPR = t;
@@ -347,9 +361,7 @@
         let b = parseFloat(document.getElementById('bunga-apr').value.replace(/,/g, '')) || 0;
         const thn = s * (b / 100);
         const p = {'tahunan': thn, 'bulanan': thn/12, 'mingguan': thn/52, 'harian': thn/365};
-        
         document.getElementById('cek-saldo-apr').innerText = (currAPR === 'USD') ? "Rp " + formatOutput(s * usdToIdr, 0) : "Rp " + formatOutput(s, 0);
-        
         for (let k in p) {
             let v = p[k];
             document.getElementById(`${k}-apr`).innerText = (currAPR === 'IDR') ? "Rp " + formatOutput(v, 0) : "$ " + v.toFixed(2);
