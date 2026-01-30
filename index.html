@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="CalcPro">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
     <meta name="theme-color" content="#0f172a">
-    <title>CalcKurs Pro v6</title>
+    <title>CalcKurs Pro v7</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -32,19 +32,19 @@
         .page.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Headers */
+        /* General Header */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 0; }
         h2 { margin: 0; font-size: 22px; color: var(--accent); }
         .refresh-btn { background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: var(--subtext); text-transform: uppercase; }
 
-        /* Input Styles */
+        /* Cards & Inputs */
         .coin-card { background: var(--card); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border: 1px solid #334155; width: 100%; margin-bottom: 12px; }
         .input-box-apr { width: 100%; padding: 16px; margin-bottom: 5px; border: 2px solid #334155; border-radius: 16px; background: var(--card); }
         .input-box-apr:focus-within { border-color: var(--accent); }
-        input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; padding: 0; }
+        input { width: 100%; background: transparent; border: none; color: white; font-size: 20px; font-weight: bold; outline: none; }
         
-        /* Coin Kurs Specific */
+        /* Kurs Page Specific */
         .coin-row { position: relative; width: 100%; }
         .price-change { font-size: 12px; font-weight: 800; min-width: 65px; text-align: right; }
         .up { color: var(--up); }
@@ -53,17 +53,17 @@
         .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .delete-btn-outside { position: absolute; right: -30px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 28px; cursor: pointer; }
 
-        /* APR Specific */
-        .kurs-info-badge { font-size: 11px; color: var(--subtext); background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px; border: 1px solid #334155; }
+        /* APR Page Specific */
+        .kurs-info-badge { font-size: 11px; color: var(--accent); background: rgba(56, 189, 248, 0.1); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--accent); }
         .currency-switch { display: flex; gap: 8px; margin-bottom: 25px; background: var(--card); padding: 4px; border-radius: 12px; }
         .currency-switch button { flex: 1; padding: 10px; border: none; border-radius: 9px; cursor: pointer; font-weight: bold; background: transparent; color: var(--subtext); }
         .currency-switch button.active { background: var(--accent); color: #0f172a; }
         .terbilang { font-size: 13px; color: var(--accent); margin-bottom: 25px; font-weight: 500; min-height: 18px; }
-        .result-grid { display: grid; gap: 12px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .apr-card { padding: 18px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .apr-card .val { font-size: 22px; font-weight: 800; display: block; margin-top: 4px; }
+        .apr-card .val { font-size: 18px; font-weight: 800; display: block; margin-top: 4px; }
         .apr-card .title { font-size: 10px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
-        .apr-card .sub-val { font-size: 12px; color: #94a3b8; display: block; margin-top: 4px; }
+        .apr-card .sub-val { font-size: 11px; color: #94a3b8; display: block; margin-top: 4px; }
         .harian { background: rgba(56, 189, 248, 0.08); color: #38bdf8; }
         .mingguan { background: rgba(167, 139, 250, 0.08); color: #a78bfa; }
         .bulanan { background: rgba(74, 222, 128, 0.08); color: #4ade80; }
@@ -127,7 +127,7 @@
     <div id="page-apr" class="page">
         <div class="header">
             <h2>💰 APR Pro</h2>
-            <div id="kurs-live-badge" class="kurs-info-badge">Rate: ...</div>
+            <div id="kurs-live-badge" class="kurs-info-badge">Rate: Rp ...</div>
         </div>
         <label>Mata Uang</label>
         <div class="currency-switch">
@@ -154,13 +154,13 @@
 </div>
 
 <script>
-    let usdToIdr = parseFloat(localStorage.getItem('last_usd_rate')) || 16000; 
+    let usdToIdr = parseFloat(localStorage.getItem('last_usd_rate')) || 16300; 
     let prices = { btc: 0, eth: 0 };
     let changes = { btc: 0, eth: 0 }; 
     let watchlist = JSON.parse(localStorage.getItem('kurs_fast_v3')) || [];
     let currentCurrencyAPR = localStorage.getItem('apr_currency') || 'IDR';
 
-    // 1. FUNGSI TAB: Biar inget tab terakhir
+    // 1. NAVIGATION SCRIPT
     function switchTab(target, btn) {
         localStorage.setItem('active_tab', target);
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -170,28 +170,34 @@
         else document.getElementById('tab-' + target + '-btn').classList.add('active');
     }
 
-    // 2. FETCH RATE: Cross-rate Bybit (Paling Realtime)
+    // 2. FETCH USD RATE: CoinGecko (Lebih stabil buat browser)
     async function fetchUsdRate() {
         try {
-            const [rIdr, rUsdt] = await Promise.all([
-                fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCIDR`),
-                fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT`)
-            ]);
-            const dIdr = await rIdr.json();
-            const dUsdt = await rUsdt.json();
-            if (dIdr.result?.list?.[0] && dUsdt.result?.list?.[0]) {
-                const btcIdr = parseFloat(dIdr.result.list[0].lastPrice);
-                const btcUsdt = parseFloat(dUsdt.result.list[0].lastPrice);
-                if (btcIdr > 0 && btcUsdt > 0) {
-                    usdToIdr = btcIdr / btcUsdt;
+            const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd-coin&vs_currencies=idr');
+            const d = await r.json();
+            if (d['usd-coin'] && d['usd-coin'].idr) {
+                usdToIdr = d['usd-coin'].idr;
+                localStorage.setItem('last_usd_rate', usdToIdr);
+                console.log("Kurs Updated:", usdToIdr);
+            }
+        } catch (e) {
+            console.log("API CoinGecko Error, nyoba Bybit...");
+            // Fallback ke Bybit kalau CoinGecko limit
+            try {
+                const r2 = await fetch('https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCIDR');
+                const d2 = await r2.json();
+                const r3 = await fetch('https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT');
+                const d3 = await r3.json();
+                if(d2.result.list[0] && d3.result.list[0]) {
+                    usdToIdr = parseFloat(d2.result.list[0].lastPrice) / parseFloat(d3.result.list[0].lastPrice);
                     localStorage.setItem('last_usd_rate', usdToIdr);
                 }
-            }
-        } catch (e) { console.log("Gagal fetch rate."); }
+            } catch(e2) { console.log("Semua API Gagal."); }
+        }
         document.getElementById('kurs-live-badge').innerText = `Rate: Rp ${Math.round(usdToIdr).toLocaleString('id-ID')}`;
     }
 
-    // 3. LOGIKA KURS
+    // 3. KURS CALCULATION
     function formatOutput(num, dec) {
         if (num === 0) return "";
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: dec }).format(num);
@@ -221,7 +227,7 @@
         if (!el.value.includes('.')) el.value = formatOutput(val, (source==='idr'?0:source==='usd'?4:8));
     }
 
-    // 4. LOGIKA APR
+    // 4. APR CALCULATION
     function setCurrencyAPR(type) {
         currentCurrencyAPR = type;
         localStorage.setItem('apr_currency', type);
@@ -260,7 +266,7 @@
         }
     }
 
-    // 5. UPDATE SEMUA HARGA
+    // 5. UPDATE CORE
     async function fetchPriceData(s) {
         try {
             const r = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s.toUpperCase()}USDT`);
@@ -277,7 +283,7 @@
 
     async function fetchAllPrices() {
         document.getElementById('status').innerText = "Updating...";
-        await fetchUsdRate(); // Pastiin rate dapet dulu
+        await fetchUsdRate(); // Ini kuncinya!
         
         const b1 = await fetchPriceData('BTC');
         prices.btc = b1.price; changes.btc = b1.change;
@@ -292,7 +298,7 @@
             prices[s] = res.price; changes[s] = res.change;
         }
         renderWatchlist();
-        hitungAPR(); // Refresh itungan APR pake rate baru
+        hitungAPR(); 
         document.getElementById('status').innerText = "Update: " + new Date().toLocaleTimeString();
     }
 
@@ -334,24 +340,4 @@
 
     function removeCoin(s) {
         watchlist = watchlist.filter(i => i !== s);
-        localStorage.setItem('kurs_fast_v3', JSON.stringify(watchlist));
-        renderWatchlist();
-    }
-
-    // 6. INISIALISASI
-    window.onload = async () => {
-        // Load data APR
-        document.getElementById('saldo-apr').value = localStorage.getItem('apr_saldo') || "";
-        document.getElementById('bunga-apr').value = localStorage.getItem('apr_bunga') || "";
-        setCurrencyAPR(currentCurrencyAPR);
-
-        // Load Tab Terakhir
-        const lastTab = localStorage.getItem('active_tab') || 'kurs';
-        switchTab(lastTab);
-
-        // Fetch Data
-        await fetchAllPrices();
-    };
-</script>
-</body>
-</html>
+        localStorage.setItem('kurs_fast_v3', JSON.stringify
